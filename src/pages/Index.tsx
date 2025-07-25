@@ -6,9 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NetworkCanvas, NetworkData } from '@/components/NetworkCanvas';
 import { FileUploader } from '@/components/FileUploader';
 import { Network, Upload, Zap } from 'lucide-react';
+import { D3NetworkCanvas } from '@/components/D3NetworkCanvas';
+import { TabularDataParser } from '@/components/TabularDataParser';
 
 const Index = () => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
+  const [visualizationType, setVisualizationType] = useState<'react-flow' | 'd3'>('d3');
 
   const handleDataLoaded = (data: NetworkData) => {
     setNetworkData(data);
@@ -29,7 +32,7 @@ const Index = () => {
                   Network Visualizer
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Interactive network analysis and visualization
+                  Interactive network analysis and visualization with D3.js
                 </p>
               </div>
             </div>
@@ -64,8 +67,8 @@ const Index = () => {
                 Visualize Your Network Data
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Upload your network files or create interactive visualizations from scratch. 
-                Analyze relationships, discover patterns, and explore your data in an intuitive way.
+                Upload network files, convert tabular data, or create interactive visualizations from scratch. 
+                Analyze relationships with D3.js force-directed layouts and discover patterns in your data.
               </p>
             </div>
 
@@ -74,9 +77,9 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Upload className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Easy Import</CardTitle>
+                  <CardTitle className="text-lg">Multiple Data Sources</CardTitle>
                   <CardDescription>
-                    Upload JSON files or paste data directly. Supports standard network formats.
+                    Upload JSON files, paste data directly, or convert CSV/tabular data to networks.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -84,9 +87,9 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Network className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Interactive Canvas</CardTitle>
+                  <CardTitle className="text-lg">D3.js Force Layout</CardTitle>
                   <CardDescription>
-                    Drag, zoom, and explore your network with smooth interactions and layouts.
+                    Automatic network positioning with physics simulation and customizable forces.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -94,25 +97,46 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Zap className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Real-time Editing</CardTitle>
+                  <CardTitle className="text-lg">Edge Weight Visualization</CardTitle>
                   <CardDescription>
-                    Add nodes, create connections, and modify your network on the fly.
+                    Connection strength indicated by line thickness and opacity based on weights.
                   </CardDescription>
                 </CardHeader>
               </Card>
             </div>
 
-            <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
+            <Tabs defaultValue="upload" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="upload">File Upload</TabsTrigger>
+                <TabsTrigger value="tabular">Tabular Data</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="upload" className="space-y-6">
+                <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
+              </TabsContent>
+              
+              <TabsContent value="tabular" className="space-y-6">
+                <TabularDataParser onDataLoaded={handleDataLoaded} />
+              </TabsContent>
+            </Tabs>
           </div>
         ) : (
           /* Main App Interface */
-          <Tabs defaultValue="canvas" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="canvas">Network Canvas</TabsTrigger>
+          <Tabs defaultValue="d3-canvas" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="d3-canvas">D3 Network</TabsTrigger>
+              <TabsTrigger value="react-flow">React Flow</TabsTrigger>
               <TabsTrigger value="data">Data Management</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="canvas" className="space-y-6">
+            <TabsContent value="d3-canvas" className="space-y-6">
+              <D3NetworkCanvas 
+                data={networkData} 
+                onDataChange={setNetworkData} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="react-flow" className="space-y-6">
               <NetworkCanvas 
                 data={networkData} 
                 onDataChange={setNetworkData} 
@@ -120,7 +144,22 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="data" className="space-y-6">
-              <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
+              <div className="space-y-6">
+                <Tabs defaultValue="upload">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="upload">File Upload</TabsTrigger>
+                    <TabsTrigger value="tabular">Tabular Data</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="upload" className="space-y-6">
+                    <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
+                  </TabsContent>
+                  
+                  <TabsContent value="tabular" className="space-y-6">
+                    <TabularDataParser onDataLoaded={handleDataLoaded} />
+                  </TabsContent>
+                </Tabs>
+              </div>
             </TabsContent>
           </Tabs>
         )}
