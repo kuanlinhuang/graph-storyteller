@@ -81,7 +81,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .force('link', d3.forceLink<D3Node, D3Link>(links).id(d => d.id).distance(linkDistance[0]))
       .force('charge', d3.forceManyBody().strength(forceStrength[0]))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(d => d.radius + 5));
+      .force('collision', d3.forceCollide().radius(d => (d as D3Node).radius + 5));
 
     // Create container groups
     const container = svg.append('g');
