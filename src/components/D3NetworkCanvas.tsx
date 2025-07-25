@@ -97,14 +97,14 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
 
     svg.call(zoom);
 
-    // Create links
+    // Create links with quantitative width based on weight
     const linkElements = linksGroup.selectAll('line')
       .data(links)
       .enter()
       .append('line')
-      .attr('stroke', 'hsl(var(--border))')
-      .attr('stroke-width', d => Math.max(1, d.weight * 2))
-      .attr('stroke-opacity', d => 0.3 + (d.weight * 0.2))
+      .attr('stroke', 'hsl(var(--edge-default))')
+      .attr('stroke-width', d => Math.max(1, d.weight * 3))
+      .attr('stroke-opacity', d => 0.6 + (d.weight * 0.3))
       .attr('marker-end', 'url(#arrowhead)');
 
     // Create arrow markers
@@ -118,7 +118,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', 'hsl(var(--border))');
+      .attr('fill', 'hsl(var(--edge-default))');
 
     // Create link labels
     const linkLabels = linksGroup.selectAll('text.link-label')
@@ -137,8 +137,8 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .enter()
       .append('circle')
       .attr('r', d => d.radius)
-      .attr('fill', d => getNodeColor(d.type))
-      .attr('stroke', 'hsl(var(--border))')
+      .attr('fill', 'hsl(var(--node-default))')
+      .attr('stroke', 'hsl(var(--background))')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
       .call(d3.drag<SVGCircleElement, D3Node>()
@@ -156,20 +156,29 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
           d.fx = null;
           d.fy = null;
         })
-      );
+      )
+      .on('mouseover', function() {
+        d3.select(this).attr('fill', 'hsl(var(--node-hover))');
+      })
+      .on('mouseout', function() {
+        d3.select(this).attr('fill', 'hsl(var(--node-default))');
+      });
 
-    // Create node labels
+    // Create node labels centered in nodes
     const nodeLabels = nodesGroup.selectAll('text.node-label')
       .data(nodes)
       .enter()
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
-      .attr('fill', 'hsl(var(--foreground))')
-      .attr('dy', d => d.radius + 15)
+      .attr('dominant-baseline', 'central')
+      .attr('font-size', d => Math.min(d.radius * 0.6, 12) + 'px')
+      .attr('font-family', 'system-ui, -apple-system, sans-serif')
+      .attr('font-weight', '600')
+      .attr('fill', 'hsl(var(--node-text))')
       .text(d => d.label)
-      .style('pointer-events', 'none');
+      .style('pointer-events', 'none')
+      .style('user-select', 'none');
 
     // Node click handler
     nodeElements.on('click', (event, d) => {
