@@ -264,7 +264,8 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
 
       {/* React Flow Canvas */}
       <Card className="flex-1 overflow-hidden shadow-card-custom">
-        <ReactFlow
+        <div style={{ width: '100%', height: '600px' }}>
+          <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
@@ -295,6 +296,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
             color="hsl(var(--border))"
           />
         </ReactFlow>
+        </div>
       </Card>
     </div>
   );

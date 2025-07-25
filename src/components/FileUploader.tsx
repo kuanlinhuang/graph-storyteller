@@ -38,6 +38,10 @@ export const FileUploader = ({ onDataLoaded, currentData }: FileUploaderProps) =
   };
 
   // Handle file upload
+const onFileUpload = useCallback((data: NetworkData) => {
+    onDataLoaded(data);
+  }, [onDataLoaded]);
+
   const handleFileUpload = useCallback((file: File) => {
     const reader = new FileReader();
     
@@ -69,7 +73,7 @@ export const FileUploader = ({ onDataLoaded, currentData }: FileUploaderProps) =
           }
         }
 
-        onDataLoaded(data);
+        onFileUpload(data);
         toast.success(`Successfully loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
       } catch (error) {
         toast.error(`Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -77,7 +81,7 @@ export const FileUploader = ({ onDataLoaded, currentData }: FileUploaderProps) =
     };
     
     reader.readAsText(file);
-  }, [onDataLoaded]);
+  }, [onFileUpload]);
 
   // Handle drag and drop
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -195,6 +199,23 @@ export const FileUploader = ({ onDataLoaded, currentData }: FileUploaderProps) =
           <div className="flex gap-2 justify-center">
             <Button onClick={loadSampleData} variant="outline">
               Load Sample Data
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                fetch('/sample-3layer-network.json')
+                  .then(res => res.json())
+                  .then(data => {
+                    onFileUpload(data);
+                    toast.success('Sample 3-layer network loaded');
+                  })
+                  .catch(err => {
+                    console.error('Error loading sample:', err);
+                    toast.error('Failed to load sample network');
+                  });
+              }}
+            >
+              Load 3-Layer Network
             </Button>
             {currentData && (
               <>

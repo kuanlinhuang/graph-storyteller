@@ -1,0 +1,112 @@
+{
+  "nodes": [
+    {
+      "id": "input-1",
+      "label": "Input Node 1",
+      "type": "input",
+      "metadata": { "layer": 1, "activation": "relu", "neurons": 784 },
+      "position": { "x": 100, "y": 100 }
+    },
+    {
+      "id": "input-2", 
+      "label": "Input Node 2",
+      "type": "input",
+      "metadata": { "layer": 1, "activation": "relu", "neurons": 784 },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "input-3",
+      "label": "Input Node 3", 
+      "type": "input",
+      "metadata": { "layer": 1, "activation": "relu", "neurons": 784 },
+      "position": { "x": 100, "y": 300 }
+    },
+    {
+      "id": "hidden-1",
+      "label": "Hidden Layer 1",
+      "type": "hidden",
+      "metadata": { "layer": 2, "activation": "sigmoid", "neurons": 128 },
+      "position": { "x": 350, "y": 150 }
+    },
+    {
+      "id": "hidden-2",
+      "label": "Hidden Layer 2", 
+      "type": "hidden",
+      "metadata": { "layer": 2, "activation": "tanh", "neurons": 64 },
+      "position": { "x": 350, "y": 250 }
+    },
+    {
+      "id": "output-1",
+      "label": "Output Node 1",
+      "type": "output", 
+      "metadata": { "layer": 3, "activation": "softmax", "neurons": 10 },
+      "position": { "x": 600, "y": 200 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-4",
+      "source": "input-1",
+      "target": "hidden-1",
+      "label": "Strong",
+      "weight": 0.8,
+      "type": "strong"
+    },
+    {
+      "id": "e1-5", 
+      "source": "input-1",
+      "target": "hidden-2",
+      "label": "Medium",
+      "weight": 0.5,
+      "type": "medium"
+    },
+    {
+      "id": "e2-4",
+      "source": "input-2", 
+      "target": "hidden-1",
+      "label": "Weak",
+      "weight": 0.3,
+      "type": "weak"
+    },
+    {
+      "id": "e2-5",
+      "source": "input-2",
+      "target": "hidden-2", 
+      "label": "Strong",
+      "weight": 0.9,
+      "type": "strong"
+    },
+    {
+      "id": "e3-4",
+      "source": "input-3",
+      "target": "hidden-1",
+      "label": "Medium", 
+      "weight": 0.6,
+      "type": "medium"
+    },
+    {
+      "id": "e3-5",
+      "source": "input-3",
+      "target": "hidden-2",
+      "label": "Critical",
+      "weight": 1.0,
+      "type": "critical"
+    },
+    {
+      "id": "e4-6",
+      "source": "hidden-1",
+      "target": "output-1",
+      "label": "Final",
+      "weight": 0.7,
+      "type": "strong"
+    },
+    {
+      "id": "e5-6", 
+      "source": "hidden-2",
+      "target": "output-1",
+      "label": "Final",
+      "weight": 0.8,
+      "type": "strong"
+    }
+  ]
+}
