@@ -52,6 +52,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Network visualization colors
+				node: {
+					DEFAULT: 'hsl(var(--node-default))',
+					selected: 'hsl(var(--node-selected))',
+					hover: 'hsl(var(--node-hover))'
+				},
+				edge: {
+					DEFAULT: 'hsl(var(--edge-default))',
+					selected: 'hsl(var(--edge-selected))'
+				},
+				canvas: 'hsl(var(--canvas-bg))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -67,6 +78,14 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-secondary': 'var(--gradient-secondary)'
+			},
+			boxShadow: {
+				'node': 'var(--shadow-node)',
+				'card-custom': 'var(--shadow-card)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +103,16 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-node': {
+					'0%, 100%': { transform: 'scale(1)', opacity: '1' },
+					'50%': { transform: 'scale(1.05)', opacity: '0.8' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-node': 'pulse-node 2s ease-in-out infinite'
 			}
 		}
 	},
