@@ -122,46 +122,81 @@ const Index = () => {
           </div>
         ) : (
           /* Main App Interface */
-          <Tabs defaultValue="d3-canvas" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="d3-canvas">D3 Network</TabsTrigger>
-              <TabsTrigger value="react-flow">React Flow</TabsTrigger>
-              <TabsTrigger value="data">Data Management</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="d3-canvas" className="space-y-6">
-              <D3NetworkCanvas 
-                data={networkData} 
-                onDataChange={setNetworkData} 
-              />
-            </TabsContent>
-            
-            <TabsContent value="react-flow" className="space-y-6">
-              <NetworkCanvas 
-                data={networkData} 
-                onDataChange={setNetworkData} 
-              />
-            </TabsContent>
-            
-            <TabsContent value="data" className="space-y-6">
-              <div className="space-y-6">
-                <Tabs defaultValue="upload">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">File Upload</TabsTrigger>
-                    <TabsTrigger value="tabular">Tabular Data</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="upload" className="space-y-6">
-                    <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
-                  </TabsContent>
-                  
-                  <TabsContent value="tabular" className="space-y-6">
-                    <TabularDataParser onDataLoaded={handleDataLoaded} />
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Network Visualization - Takes 2/3 of the space */}
+            <div className="lg:col-span-2">
+              <Tabs defaultValue="d3-canvas" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="d3-canvas">D3 Network</TabsTrigger>
+                  <TabsTrigger value="react-flow">React Flow</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="d3-canvas" className="space-y-6">
+                  <D3NetworkCanvas 
+                    data={networkData} 
+                    onDataChange={setNetworkData} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="react-flow" className="space-y-6">
+                  <NetworkCanvas 
+                    data={networkData} 
+                    onDataChange={setNetworkData} 
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Data Management - Takes 1/3 of the space */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Management</CardTitle>
+                  <CardDescription>
+                    Manage your network data and upload new datasets
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="current" className="space-y-4">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="current">Current</TabsTrigger>
+                      <TabsTrigger value="upload">Upload</TabsTrigger>
+                      <TabsTrigger value="tabular">Convert</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="current" className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">Dataset</span>
+                          <Badge variant="secondary">Loaded</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Badge variant="outline">
+                            {networkData.nodes.length} nodes
+                          </Badge>
+                          <Badge variant="outline">
+                            {networkData.edges.length} edges
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          <div>Max edge weight: {Math.max(...networkData.edges.map(e => e.weight))}</div>
+                          <div>Min edge weight: {Math.min(...networkData.edges.map(e => e.weight))}</div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="upload" className="space-y-4">
+                      <FileUploader onDataLoaded={handleDataLoaded} currentData={networkData} />
+                    </TabsContent>
+                    
+                    <TabsContent value="tabular" className="space-y-4">
+                      <TabularDataParser onDataLoaded={handleDataLoaded} />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         )}
       </main>
     </div>

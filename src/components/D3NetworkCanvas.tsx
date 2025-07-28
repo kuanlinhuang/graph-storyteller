@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Card } from '@/components/ui/card';
@@ -39,6 +38,9 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
   const [selectedNode, setSelectedNode] = useState<D3Node | null>(null);
   const [forceStrength, setForceStrength] = useState([-100]);
   const [linkDistance, setLinkDistance] = useState([50]);
+  const [nodeSize, setNodeSize] = useState([8]);
+  const [fontSize, setFontSize] = useState([12]);
+  const [showDirected, setShowDirected] = useState(true);
 
   // Convert network data to D3 format
   useEffect(() => {
@@ -49,7 +51,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       label: node.label,
       type: node.type,
       metadata: node.metadata,
-      radius: 20 + (node.metadata?.importance || 0) * 5,
+      radius: nodeSize[0],
     }));
 
     const d3Links: D3Link[] = data.edges.map(edge => ({
@@ -63,87 +65,72 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
 
     setNodes(d3Nodes);
     setLinks(d3Links);
-  }, [data]);
+  }, [data, nodeSize]);
 
   // Initialize D3 simulation
   useEffect(() => {
     if (!svgRef.current || nodes.length === 0) return;
 
     const svg = d3.select(svgRef.current);
-    const width = 800;
-    const height = 600;
-
-    // Clear previous content
     svg.selectAll('*').remove();
 
-    // Create simulation
-    const sim = d3.forceSimulation<D3Node>(nodes)
-      .force('link', d3.forceLink<D3Node, D3Link>(links).id(d => d.id).distance(linkDistance[0]))
-      .force('charge', d3.forceManyBody().strength(forceStrength[0]))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(d => (d as D3Node).radius + 5));
-
-    // Create container groups
-    const container = svg.append('g');
-    const linksGroup = container.append('g').attr('class', 'links');
-    const nodesGroup = container.append('g').attr('class', 'nodes');
-
-    // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
-        container.attr('transform', event.transform);
-      });
-
-    svg.call(zoom);
-
-    // Create links with quantitative width based on weight
-    const linkElements = linksGroup.selectAll('line')
-      .data(links)
-      .enter()
-      .append('line')
-      .attr('stroke', 'hsl(var(--edge-default))')
-      .attr('stroke-width', d => Math.max(1, d.weight * 3))
-      .attr('stroke-opacity', d => 0.6 + (d.weight * 0.3))
-      .attr('marker-end', 'url(#arrowhead)');
-
-    // Create arrow markers
-    svg.append('defs').append('marker')
+    // Create defs for arrowheads
+    const defs = svg.append('defs');
+    
+    // Create arrowhead marker
+    defs.append('marker')
       .attr('id', 'arrowhead')
       .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 25)
+      .attr('refX', 15)
       .attr('refY', 0)
       .attr('markerWidth', 6)
       .attr('markerHeight', 6)
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', 'hsl(var(--edge-default))');
+      .attr('fill', 'hsl(var(--primary))')
+      .style('opacity', 0.7);
 
-    // Create link labels
-    const linkLabels = linksGroup.selectAll('text.link-label')
-      .data(links.filter(d => d.label))
+    const g = svg.append('g');
+
+    // Zoom behavior
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 10])
+      .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Draw links
+    const linkElements = g.selectAll<SVGLineElement, D3Link>('.link')
+      .data(links)
       .enter()
-      .append('text')
-      .attr('class', 'link-label')
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '10px')
-      .attr('fill', 'hsl(var(--muted-foreground))')
-      .text(d => d.label || '');
+      .append('line')
+      .attr('class', 'link')
+      .style('stroke', 'hsl(var(--primary))')
+      .style('stroke-width', d => Math.max(1, d.weight * 2))
+      .style('opacity', d => Math.min(1, Math.max(0.3, d.weight / 10)))
+      .attr('marker-end', showDirected ? 'url(#arrowhead)' : null);
 
-    // Create nodes
-    const nodeElements = nodesGroup.selectAll('circle')
+    // Draw nodes
+    const nodeElements = g.selectAll<SVGCircleElement, D3Node>('.node')
       .data(nodes)
       .enter()
       .append('circle')
+      .attr('class', 'node')
       .attr('r', d => d.radius)
-      .attr('fill', 'hsl(var(--node-default))')
-      .attr('stroke', 'hsl(var(--background))')
-      .attr('stroke-width', 2)
+      .style('fill', d => getNodeColor(d.type))
+      .style('stroke', 'hsl(var(--background))')
+      .style('stroke-width', 2)
       .style('cursor', 'pointer')
+      .on('click', (event, d) => {
+        setSelectedNode(d);
+        toast.info(`Selected: ${d.label}`);
+      })
       .call(d3.drag<SVGCircleElement, D3Node>()
         .on('start', (event, d) => {
-          if (!event.active) sim.alphaTarget(0.3).restart();
+          if (!event.active) simulation?.alphaTarget(0.3).restart();
           d.fx = d.x;
           d.fy = d.y;
         })
@@ -152,51 +139,43 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
           d.fy = event.y;
         })
         .on('end', (event, d) => {
-          if (!event.active) sim.alphaTarget(0);
+          if (!event.active) simulation?.alphaTarget(0);
           d.fx = null;
           d.fy = null;
         })
-      )
-      .on('mouseover', function() {
-        d3.select(this).attr('fill', 'hsl(var(--node-hover))');
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('fill', 'hsl(var(--node-default))');
-      });
+      );
 
-    // Create node labels centered in nodes
-    const nodeLabels = nodesGroup.selectAll('text.node-label')
+    // Add node labels
+    const nodeLabels = g.selectAll<SVGTextElement, D3Node>('.node-label')
       .data(nodes)
       .enter()
       .append('text')
       .attr('class', 'node-label')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'central')
-      .attr('font-size', d => Math.min(d.radius * 0.6, 12) + 'px')
-      .attr('font-family', 'system-ui, -apple-system, sans-serif')
-      .attr('font-weight', '600')
-      .attr('fill', 'hsl(var(--node-text))')
       .text(d => d.label)
+      .style('font-size', `${fontSize[0]}px`)
+      .style('font-weight', '500')
+      .style('fill', 'hsl(var(--foreground))')
+      .style('text-anchor', 'middle')
+      .style('dominant-baseline', 'central')
       .style('pointer-events', 'none')
       .style('user-select', 'none');
 
-    // Node click handler
-    nodeElements.on('click', (event, d) => {
-      setSelectedNode(d);
-      event.stopPropagation();
-    });
+    // Create simulation
+    const sim = d3.forceSimulation<D3Node>(nodes)
+      .force('link', d3.forceLink<D3Node, D3Link>(links)
+        .id(d => d.id)
+        .distance(linkDistance[0])
+      )
+      .force('charge', d3.forceManyBody().strength(forceStrength[0]))
+      .force('center', d3.forceCenter(400, 250))
+      .force('collision', d3.forceCollide().radius((d: any) => (d as D3Node).radius + 2));
 
-    // Update positions on tick
     sim.on('tick', () => {
       linkElements
         .attr('x1', d => (d.source as D3Node).x!)
         .attr('y1', d => (d.source as D3Node).y!)
         .attr('x2', d => (d.target as D3Node).x!)
         .attr('y2', d => (d.target as D3Node).y!);
-
-      linkLabels
-        .attr('x', d => ((d.source as D3Node).x! + (d.target as D3Node).x!) / 2)
-        .attr('y', d => ((d.source as D3Node).y! + (d.target as D3Node).y!) / 2);
 
       nodeElements
         .attr('cx', d => d.x!)
@@ -212,7 +191,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
     return () => {
       sim.stop();
     };
-  }, [nodes, links, forceStrength, linkDistance]);
+  }, [nodes, links, forceStrength, linkDistance, nodeSize, fontSize, showDirected]);
 
   const getNodeColor = (type?: string) => {
     switch (type) {
@@ -236,7 +215,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
     
     const svg = d3.select(svgRef.current);
     const width = 800;
-    const height = 600;
+    const height = 500;
     
     svg.transition().duration(750).call(
       d3.zoom<SVGSVGElement, unknown>().transform,
@@ -250,7 +229,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
     <div className="space-y-4">
       {/* Controls */}
       <Card className="p-4">
-        <div className="flex flex-wrap gap-4 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="flex gap-2">
             <Button onClick={reheatSimulation} size="sm">
               Reheat Simulation
@@ -261,35 +240,73 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
           </div>
           
           <div className="flex items-center gap-2">
-            <Label className="text-sm">Force Strength:</Label>
+            <Label className="text-sm">Force:</Label>
             <Slider
               value={forceStrength}
               onValueChange={setForceStrength}
               min={-500}
               max={-10}
               step={10}
-              className="w-32"
+              className="w-24"
             />
-            <span className="text-sm text-muted-foreground">{forceStrength[0]}</span>
+            <span className="text-xs text-muted-foreground w-8">{forceStrength[0]}</span>
           </div>
           
           <div className="flex items-center gap-2">
-            <Label className="text-sm">Link Distance:</Label>
+            <Label className="text-sm">Distance:</Label>
             <Slider
               value={linkDistance}
               onValueChange={setLinkDistance}
               min={20}
               max={200}
               step={10}
-              className="w-32"
+              className="w-24"
             />
-            <span className="text-sm text-muted-foreground">{linkDistance[0]}</span>
+            <span className="text-xs text-muted-foreground w-8">{linkDistance[0]}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Node Size:</Label>
+            <Slider
+              value={nodeSize}
+              onValueChange={setNodeSize}
+              min={3}
+              max={20}
+              step={1}
+              className="w-24"
+            />
+            <span className="text-xs text-muted-foreground w-8">{nodeSize[0]}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Font Size:</Label>
+            <Slider
+              value={fontSize}
+              onValueChange={setFontSize}
+              min={8}
+              max={24}
+              step={1}
+              className="w-24"
+            />
+            <span className="text-xs text-muted-foreground w-8">{fontSize[0]}</span>
           </div>
           
-          <div className="flex gap-2">
-            <Badge variant="secondary">{nodes.length} nodes</Badge>
-            <Badge variant="secondary">{links.length} links</Badge>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Directed:</Label>
+            <Button 
+              onClick={() => setShowDirected(!showDirected)} 
+              size="sm" 
+              variant={showDirected ? "default" : "outline"}
+              className="h-8 w-16"
+            >
+              {showDirected ? "ON" : "OFF"}
+            </Button>
           </div>
+        </div>
+        
+        <div className="flex gap-2 mt-4">
+          <Badge variant="secondary">{nodes.length} nodes</Badge>
+          <Badge variant="secondary">{links.length} links</Badge>
         </div>
       </Card>
 
@@ -298,9 +315,9 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
         <svg
           ref={svgRef}
           width={800}
-          height={600}
+          height={500}
           style={{ border: '1px solid hsl(var(--border))' }}
-          className="rounded-lg"
+          className="rounded-lg w-full"
         />
       </Card>
 
