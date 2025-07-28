@@ -105,8 +105,8 @@ export const TabularDataParser = ({ onDataLoaded }: TabularDataParserProps) => {
     const headers = parsedData[0];
     const sourceIdx = headers.indexOf(sourceColumn);
     const targetIdx = headers.indexOf(targetColumn);
-    const weightIdx = weightColumn ? headers.indexOf(weightColumn) : -1;
-    const labelIdx = labelColumn ? headers.indexOf(labelColumn) : -1;
+    const weightIdx = weightColumn && weightColumn !== 'none' ? headers.indexOf(weightColumn) : -1;
+    const labelIdx = labelColumn && labelColumn !== 'none' ? headers.indexOf(labelColumn) : -1;
 
     if (sourceIdx === -1 || targetIdx === -1) {
       toast.error('Selected columns not found');
@@ -247,7 +247,7 @@ node2,node3,3,link"
                     <SelectValue placeholder="Select weight (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {parsedData[0]?.map(header => (
                       <SelectItem key={header} value={header}>{header}</SelectItem>
                     ))}
@@ -262,7 +262,7 @@ node2,node3,3,link"
                     <SelectValue placeholder="Select label (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {parsedData[0]?.map(header => (
                       <SelectItem key={header} value={header}>{header}</SelectItem>
                     ))}
