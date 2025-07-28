@@ -122,9 +122,9 @@ const Index = () => {
           </div>
         ) : (
           /* Main App Interface */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Network Visualization - Takes 2/3 of the space */}
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Network Visualization - Takes 3/4 of the space */}
+            <div className="lg:col-span-3">
               <Tabs defaultValue="d3-canvas" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="d3-canvas">D3 Network</TabsTrigger>
@@ -147,9 +147,9 @@ const Index = () => {
               </Tabs>
             </div>
 
-            {/* Data Management - Takes 1/3 of the space */}
+            {/* Data Management - Takes 1/4 of the space, always visible */}
             <div className="lg:col-span-1">
-              <Card>
+              <Card className="h-fit">
                 <CardHeader>
                   <CardTitle>Data Management</CardTitle>
                   <CardDescription>
@@ -170,18 +170,26 @@ const Index = () => {
                           <span className="text-sm font-medium">Dataset</span>
                           <Badge variant="secondary">Loaded</Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Badge variant="outline">
+                        <div className="grid grid-cols-1 gap-2">
+                          <Badge variant="outline" className="text-center">
                             {networkData.nodes.length} nodes
                           </Badge>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="text-center">
                             {networkData.edges.length} edges
                           </Badge>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          <div>Max edge weight: {Math.max(...networkData.edges.map(e => e.weight))}</div>
-                          <div>Min edge weight: {Math.min(...networkData.edges.map(e => e.weight))}</div>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <div>Max edge weight: {Math.max(...networkData.edges.map(e => e.weight || 1))}</div>
+                          <div>Min edge weight: {Math.min(...networkData.edges.map(e => e.weight || 1))}</div>
                         </div>
+                        <Button 
+                          onClick={() => setNetworkData(null)} 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full mt-3"
+                        >
+                          Clear Data & Start New
+                        </Button>
                       </div>
                     </TabsContent>
                     

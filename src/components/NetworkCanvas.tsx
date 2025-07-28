@@ -12,11 +12,14 @@ import {
   Node,
   BackgroundVariant,
   ConnectionMode,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { NetworkNode } from './NetworkNode';
 import { NetworkEdge } from './NetworkEdge';
@@ -57,6 +60,9 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
+  const [nodeSize, setNodeSize] = useState([40]);
+  const [fontSize, setFontSize] = useState([12]);
+  const [showDirected, setShowDirected] = useState(true);
 
   // Convert network data to React Flow format
   useEffect(() => {
@@ -73,6 +79,13 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         label: node.label,
         metadata: node.metadata,
         nodeType: node.type || 'default',
+        nodeSize: nodeSize[0],
+        fontSize: fontSize[0],
+      },
+      style: {
+        width: nodeSize[0],
+        height: nodeSize[0],
+        fontSize: fontSize[0],
       },
     }));
 
@@ -87,9 +100,15 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         edgeType: edge.type || 'default',
       },
       animated: false,
+      markerEnd: showDirected ? {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: 'hsl(var(--primary))',
+      } : undefined,
       style: {
         strokeWidth: Math.max(1, (edge.weight || 1) * 2),
-        stroke: 'hsl(var(--edge-default))',
+        stroke: 'hsl(var(--primary))',
       },
     }));
 
@@ -99,7 +118,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     if (flowNodes.length > 0) {
       toast.success(`Loaded ${flowNodes.length} nodes and ${flowEdges.length} edges`);
     }
-  }, [data, setNodes, setEdges]);
+  }, [data, nodeSize, fontSize, showDirected, setNodes, setEdges]);
 
   // Handle new connections
   const onConnect = useCallback(
@@ -225,39 +244,82 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     <div className="flex flex-col h-full">
       {/* Toolbar */}
       <Card className="p-4 mb-4 shadow-card-custom">
-        <div className="flex flex-wrap gap-2 items-center justify-between">
-          <div className="flex gap-2">
-            <Button onClick={addNode} variant="default" size="sm">
-              Add Node
-            </Button>
-            <Button 
-              onClick={deleteSelected} 
-              variant="destructive" 
-              size="sm"
-              disabled={selectedNodes.length === 0 && selectedEdges.length === 0}
-            >
-              Delete Selected
-            </Button>
-            <Button onClick={clearCanvas} variant="outline" size="sm">
-              Clear All
-            </Button>
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2 items-center justify-between">
+            <div className="flex gap-2">
+              <Button onClick={addNode} variant="default" size="sm">
+                Add Node
+              </Button>
+              <Button 
+                onClick={deleteSelected} 
+                variant="destructive" 
+                size="sm"
+                disabled={selectedNodes.length === 0 && selectedEdges.length === 0}
+              >
+                Delete Selected
+              </Button>
+              <Button onClick={clearCanvas} variant="outline" size="sm">
+                Clear All
+              </Button>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={arrangeInCircle} variant="secondary" size="sm">
+                Circle Layout
+              </Button>
+              <Button onClick={arrangeInGrid} variant="secondary" size="sm">
+                Grid Layout
+              </Button>
+            </div>
+            
+            <div className="flex gap-2 items-center">
+              <Badge variant="secondary">{nodes.length} nodes</Badge>
+              <Badge variant="secondary">{edges.length} edges</Badge>
+              {selectedNodes.length > 0 && (
+                <Badge variant="default">{selectedNodes.length} selected</Badge>
+              )}
+            </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button onClick={arrangeInCircle} variant="secondary" size="sm">
-              Circle Layout
-            </Button>
-            <Button onClick={arrangeInGrid} variant="secondary" size="sm">
-              Grid Layout
-            </Button>
-          </div>
-          
-          <div className="flex gap-2 items-center">
-            <Badge variant="secondary">{nodes.length} nodes</Badge>
-            <Badge variant="secondary">{edges.length} edges</Badge>
-            {selectedNodes.length > 0 && (
-              <Badge variant="default">{selectedNodes.length} selected</Badge>
-            )}
+          {/* Controls */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Node Size:</Label>
+              <Slider
+                value={nodeSize}
+                onValueChange={setNodeSize}
+                min={20}
+                max={80}
+                step={5}
+                className="w-20"
+              />
+              <span className="text-xs text-muted-foreground w-8">{nodeSize[0]}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Font Size:</Label>
+              <Slider
+                value={fontSize}
+                onValueChange={setFontSize}
+                min={8}
+                max={20}
+                step={1}
+                className="w-20"
+              />
+              <span className="text-xs text-muted-foreground w-8">{fontSize[0]}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Directed:</Label>
+              <Button 
+                onClick={() => setShowDirected(!showDirected)} 
+                size="sm" 
+                variant={showDirected ? "default" : "outline"}
+                className="h-8 w-16"
+              >
+                {showDirected ? "ON" : "OFF"}
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
