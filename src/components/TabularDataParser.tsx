@@ -183,9 +183,7 @@ API1,Database1,5,Query`;
             <Label htmlFor="csv-input">CSV Data</Label>
             <Textarea
               id="csv-input"
-              placeholder="source,target,weight,label
-node1,node2,5,connection
-node2,node3,3,link"
+              placeholder="source,target,weight,label"
               value={csvInput}
               onChange={(e) => setCsvInput(e.target.value)}
               rows={8}
