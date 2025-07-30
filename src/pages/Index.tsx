@@ -66,9 +66,7 @@ const Index = () => {
                 <CardHeader>
                   <Upload className="h-8 w-8 text-primary mb-2" />
                   <CardTitle className="text-lg">Multiple Data Sources</CardTitle>
-                  <CardDescription>
-                    Upload JSON files, paste data directly, or convert CSV/tabular data to networks.
-                  </CardDescription>
+                  <CardDescription>Upload JSON files or convert CSV/tabular data as network inputs.</CardDescription>
                 </CardHeader>
               </Card>
               
