@@ -165,7 +165,7 @@ API1,Database1,5,Query`;
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="csv-file">Upload CSV File</Label>
-            <Input id="csv-file" type="file" accept=".csv" onChange={handleFileUpload} ref={fileInputRef} className="mb-4" />
+            <Input id="csv-file" type="file" accept=".csv" onChange={handleFileUpload} ref={fileInputRef} className="mb-4 file:bg-primary file:text-primary-foreground file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer hover:file:bg-primary/90" />
           </div>
           
           <div>
