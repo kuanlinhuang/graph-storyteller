@@ -63,6 +63,8 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [nodeSize, setNodeSize] = useState([40]);
   const [fontSize, setFontSize] = useState([12]);
   const [showDirected, setShowDirected] = useState(true);
+  const [textColor, setTextColor] = useState(['#000000']);
+  const [edgeColor, setEdgeColor] = useState(['#3b82f6']);
 
   // Convert network data to React Flow format
   useEffect(() => {
@@ -81,6 +83,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         nodeType: node.type || 'default',
         nodeSize: nodeSize[0],
         fontSize: fontSize[0],
+        textColor: textColor[0],
       },
       style: {
         width: nodeSize[0],
@@ -104,11 +107,11 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         type: MarkerType.ArrowClosed,
         width: 20,
         height: 20,
-        color: 'hsl(var(--primary))',
+        color: edgeColor[0],
       } : undefined,
       style: {
         strokeWidth: Math.max(1, (edge.weight || 1) * 2),
-        stroke: 'hsl(var(--primary))',
+        stroke: edgeColor[0],
       },
     }));
 
@@ -118,7 +121,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     if (flowNodes.length > 0) {
       toast.success(`Loaded ${flowNodes.length} nodes and ${flowEdges.length} edges`);
     }
-  }, [data, nodeSize, fontSize, showDirected, setNodes, setEdges]);
+  }, [data, nodeSize, fontSize, showDirected, textColor, edgeColor, setNodes, setEdges]);
 
   // Handle new connections
   const onConnect = useCallback(
@@ -288,7 +291,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
               <Slider
                 value={nodeSize}
                 onValueChange={setNodeSize}
-                min={20}
+                min={0}
                 max={80}
                 step={5}
                 className="w-20"
@@ -307,6 +310,26 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
                 className="w-20"
               />
               <span className="text-xs text-muted-foreground w-8">{fontSize[0]}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Text Color:</Label>
+              <input
+                type="color"
+                value={textColor[0]}
+                onChange={(e) => setTextColor([e.target.value])}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Edge Color:</Label>
+              <input
+                type="color"
+                value={edgeColor[0]}
+                onChange={(e) => setEdgeColor([e.target.value])}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
             </div>
             
             <div className="flex items-center gap-2">

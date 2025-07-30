@@ -41,6 +41,8 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
   const [nodeSize, setNodeSize] = useState([8]);
   const [fontSize, setFontSize] = useState([12]);
   const [showDirected, setShowDirected] = useState(true);
+  const [textColor, setTextColor] = useState(['hsl(var(--foreground))']);
+  const [edgeColor, setEdgeColor] = useState(['hsl(var(--primary))']);
 
   // Convert network data to D3 format
   useEffect(() => {
@@ -88,7 +90,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', 'hsl(var(--primary))')
+      .attr('fill', edgeColor[0])
       .style('opacity', 0.7);
 
     const g = svg.append('g');
@@ -108,7 +110,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .enter()
       .append('line')
       .attr('class', 'link')
-      .style('stroke', 'hsl(var(--primary))')
+      .style('stroke', edgeColor[0])
       .style('stroke-width', d => Math.max(1, d.weight * 2))
       .style('opacity', d => Math.min(1, Math.max(0.3, d.weight / 10)))
       .attr('marker-end', showDirected ? 'url(#arrowhead)' : null);
@@ -154,7 +156,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
       .text(d => d.label)
       .style('font-size', `${fontSize[0]}px`)
       .style('font-weight', '500')
-      .style('fill', 'hsl(var(--foreground))')
+      .style('fill', textColor[0])
       .style('text-anchor', 'middle')
       .style('dominant-baseline', 'central')
       .style('pointer-events', 'none')
@@ -191,7 +193,7 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
     return () => {
       sim.stop();
     };
-  }, [nodes, links, forceStrength, linkDistance, nodeSize, fontSize, showDirected]);
+  }, [nodes, links, forceStrength, linkDistance, nodeSize, fontSize, showDirected, textColor, edgeColor]);
 
   const getNodeColor = (type?: string) => {
     switch (type) {
@@ -211,19 +213,24 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
   }, [simulation]);
 
   const centerGraph = useCallback(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !simulation) return;
     
     const svg = d3.select(svgRef.current);
     const width = 800;
     const height = 500;
     
+    // Reset simulation center
+    simulation.force('center', d3.forceCenter(width / 2, height / 2));
+    simulation.alpha(0.3).restart();
+    
+    // Center the view
     svg.transition().duration(750).call(
       d3.zoom<SVGSVGElement, unknown>().transform,
-      d3.zoomIdentity.translate(width / 2, height / 2).scale(1)
+      d3.zoomIdentity.translate(0, 0).scale(1)
     );
     
     toast.success('Graph centered');
-  }, []);
+  }, [simulation]);
 
   return (
     <div className="space-y-4">
@@ -265,18 +272,18 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
             <span className="text-xs text-muted-foreground w-8">{linkDistance[0]}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Label className="text-sm">Node Size:</Label>
-            <Slider
-              value={nodeSize}
-              onValueChange={setNodeSize}
-              min={3}
-              max={20}
-              step={1}
-              className="w-24"
-            />
-            <span className="text-xs text-muted-foreground w-8">{nodeSize[0]}</span>
-          </div>
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Node Size:</Label>
+              <Slider
+                value={nodeSize}
+                onValueChange={setNodeSize}
+                min={0}
+                max={20}
+                step={1}
+                className="w-24"
+              />
+              <span className="text-xs text-muted-foreground w-8">{nodeSize[0]}</span>
+            </div>
 
           <div className="flex items-center gap-2">
             <Label className="text-sm">Font Size:</Label>
@@ -289,6 +296,26 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
               className="w-24"
             />
             <span className="text-xs text-muted-foreground w-8">{fontSize[0]}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Text Color:</Label>
+            <input
+              type="color"
+              value={textColor[0].includes('hsl') ? '#000000' : textColor[0]}
+              onChange={(e) => setTextColor([e.target.value])}
+              className="w-8 h-8 rounded cursor-pointer"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Edge Color:</Label>
+            <input
+              type="color"
+              value={edgeColor[0].includes('hsl') ? '#3b82f6' : edgeColor[0]}
+              onChange={(e) => setEdgeColor([e.target.value])}
+              className="w-8 h-8 rounded cursor-pointer"
+            />
           </div>
           
           <div className="flex items-center gap-2">

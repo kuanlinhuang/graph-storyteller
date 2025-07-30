@@ -72,6 +72,7 @@ export const NetworkNode = memo((props: any) => {
                 if (e.key === 'Escape') setIsEditing(false);
               }}
               className="text-center text-sm"
+              style={{ color: data?.textColor }}
               autoFocus
             />
             <div className="flex gap-1">
@@ -90,7 +91,10 @@ export const NetworkNode = memo((props: any) => {
           </div>
         ) : (
           <div className="flex items-center gap-2 w-full justify-center">
-            <span className="text-sm font-medium text-center min-w-0 flex-1">
+            <span 
+              className="text-sm font-medium text-center min-w-0 flex-1"
+              style={{ color: data?.textColor }}
+            >
               {data?.label || 'Node'}
             </span>
             <Button
