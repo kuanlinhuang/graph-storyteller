@@ -265,9 +265,7 @@ export const FileUploader = ({
       <Card className="shadow-card-custom">
         <CardHeader>
           <CardTitle>Direct JSON Input</CardTitle>
-          <CardDescription>
-            Paste your network data in JSON format
-          </CardDescription>
+          <CardDescription>Load Sample</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
