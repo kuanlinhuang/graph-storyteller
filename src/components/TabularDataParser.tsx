@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { NetworkData } from './NetworkCanvas';
 
@@ -21,6 +22,7 @@ export const TabularDataParser = ({ onDataLoaded }: TabularDataParserProps) => {
   const [targetColumn, setTargetColumn] = useState<string>('');
   const [weightColumn, setWeightColumn] = useState<string>('');
   const [labelColumn, setLabelColumn] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parseCsvData = useCallback(() => {
     if (!csvInput.trim()) {
@@ -169,6 +171,27 @@ API1,Database1,5,Query`;
     toast.success('Sample CSV data loaded');
   }, []);
 
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setCsvInput(content);
+      toast.success(`CSV file "${file.name}" loaded successfully`);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read file');
+    };
+    reader.readAsText(file);
+  }, []);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -179,6 +202,18 @@ API1,Database1,5,Query`;
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="csv-file">Upload CSV File</Label>
+            <Input
+              id="csv-file"
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              ref={fileInputRef}
+              className="mb-4"
+            />
+          </div>
+          
           <div>
             <Label htmlFor="csv-input">CSV Data</Label>
             <Textarea
