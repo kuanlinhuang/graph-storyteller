@@ -27,9 +27,7 @@ const Index = () => {
                 <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                   Network Visualizer
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  Interactive network analysis and visualization with D3.js
-                </p>
+                <p className="text-sm text-muted-foreground">Interactive network visualization with D3 and React flow</p>
               </div>
             </div>
             
@@ -59,10 +57,7 @@ const Index = () => {
               <h2 className="text-3xl font-bold mb-4">
                 Visualize Your Network Data
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Upload network files, convert tabular data, or create interactive visualizations from scratch. 
-                Analyze relationships with D3.js force-directed layouts and discover patterns in your data.
-              </p>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Upload network files, convert tabular data, and create interactive visualizations. Visualize relationships with D3.js force-directed layouts and React flow.</p>
             </div>
 
             {/* Features */}
@@ -81,9 +76,7 @@ const Index = () => {
                 <CardHeader>
                   <Network className="h-8 w-8 text-primary mb-2" />
                   <CardTitle className="text-lg">D3.js Force Layout</CardTitle>
-                  <CardDescription>
-                    Automatic network positioning with physics simulation and customizable forces.
-                  </CardDescription>
+                  <CardDescription>Automatic network positioning with physics simulation or React Flow.</CardDescription>
                 </CardHeader>
               </Card>
               
@@ -91,9 +84,7 @@ const Index = () => {
                 <CardHeader>
                   <Zap className="h-8 w-8 text-primary mb-2" />
                   <CardTitle className="text-lg">Edge Weight Visualization</CardTitle>
-                  <CardDescription>
-                    Connection strength indicated by line thickness and opacity based on weights.
-                  </CardDescription>
+                  <CardDescription>Connection strength indicated by line thickness based on weights.</CardDescription>
                 </CardHeader>
               </Card>
             </div>
