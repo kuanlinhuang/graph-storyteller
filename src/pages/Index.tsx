@@ -8,17 +8,13 @@ import { FileUploader } from '@/components/FileUploader';
 import { Network, Upload, Zap } from 'lucide-react';
 import { D3NetworkCanvas } from '@/components/D3NetworkCanvas';
 import { TabularDataParser } from '@/components/TabularDataParser';
-
 const Index = () => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
   const [visualizationType, setVisualizationType] = useState<'react-flow' | 'd3'>('d3');
-
   const handleDataLoaded = (data: NetworkData) => {
     setNetworkData(data);
   };
-
-  return (
-    <div className="min-h-screen bg-canvas">
+  return <div className="min-h-screen bg-canvas">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -38,16 +34,14 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              {networkData && (
-                <div className="flex gap-2">
+              {networkData && <div className="flex gap-2">
                   <Badge variant="secondary">
                     {networkData.nodes.length} nodes
                   </Badge>
                   <Badge variant="secondary">
                     {networkData.edges.length} edges
                   </Badge>
-                </div>
-              )}
+                </div>}
               <Button variant="outline" size="sm">
                 <Zap className="h-4 w-4 mr-2" />
                 Quick Start
@@ -59,9 +53,8 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {!networkData ? (
-          /* Welcome Screen */
-          <div className="max-w-4xl mx-auto">
+        {!networkData ? (/* Welcome Screen */
+      <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">
                 Visualize Your Network Data
@@ -107,8 +100,8 @@ const Index = () => {
 
             <Tabs defaultValue="upload" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">File Upload</TabsTrigger>
-                <TabsTrigger value="tabular">Tabular Data</TabsTrigger>
+                <TabsTrigger value="upload">JSON Network File Upload</TabsTrigger>
+                <TabsTrigger value="tabular">Tabular Network File Upload</TabsTrigger>
               </TabsList>
               
               <TabsContent value="upload" className="space-y-6">
@@ -119,10 +112,8 @@ const Index = () => {
                 <TabularDataParser onDataLoaded={handleDataLoaded} />
               </TabsContent>
             </Tabs>
-          </div>
-        ) : (
-          /* Main App Interface */
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          </div>) : (/* Main App Interface */
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Network Visualization - Takes 3/4 of the space */}
             <div className="lg:col-span-3">
               <Tabs defaultValue="d3-canvas" className="space-y-6">
@@ -132,17 +123,11 @@ const Index = () => {
                 </TabsList>
                 
                 <TabsContent value="d3-canvas" className="space-y-6">
-                  <D3NetworkCanvas 
-                    data={networkData} 
-                    onDataChange={setNetworkData} 
-                  />
+                  <D3NetworkCanvas data={networkData} onDataChange={setNetworkData} />
                 </TabsContent>
                 
                 <TabsContent value="react-flow" className="space-y-6">
-                  <NetworkCanvas 
-                    data={networkData} 
-                    onDataChange={setNetworkData} 
-                  />
+                  <NetworkCanvas data={networkData} onDataChange={setNetworkData} />
                 </TabsContent>
               </Tabs>
             </div>
@@ -182,12 +167,7 @@ const Index = () => {
                           <div>Max edge weight: {Math.max(...networkData.edges.map(e => e.weight || 1))}</div>
                           <div>Min edge weight: {Math.min(...networkData.edges.map(e => e.weight || 1))}</div>
                         </div>
-                        <Button 
-                          onClick={() => setNetworkData(null)} 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full mt-3"
-                        >
+                        <Button onClick={() => setNetworkData(null)} variant="outline" size="sm" className="w-full mt-3">
                           Clear Data & Start New
                         </Button>
                       </div>
@@ -204,11 +184,8 @@ const Index = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        )}
+          </div>)}
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
