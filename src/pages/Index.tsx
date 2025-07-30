@@ -71,7 +71,7 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Network className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">D3.js Force & React Flow Layout</CardTitle>
+                  <CardTitle className="text-lg">D3.js & React Flow Layouts</CardTitle>
                   <CardDescription>Automatic positioning with D3 physics simulation or React Flow.</CardDescription>
                 </CardHeader>
               </Card>
@@ -79,8 +79,8 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Zap className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Edge Weight Visualization</CardTitle>
-                  <CardDescription>Connection strength indicated by line thickness & transparency.</CardDescription>
+                  <CardTitle className="text-lg">Node &amp; Edge Visualization</CardTitle>
+                  <CardDescription>Various ways to visualize node labels and connection strengths.</CardDescription>
                 </CardHeader>
               </Card>
             </div>
