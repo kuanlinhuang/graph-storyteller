@@ -175,9 +175,7 @@ API1,Database1,5,Query`;
           
           <div className="flex gap-2">
             <Button onClick={parseCsvData}>Parse CSV</Button>
-            <Button onClick={loadSampleCsv} variant="outline">
-              Load Sample
-            </Button>
+            <Button onClick={loadSampleCsv} variant="outline">Load Sample Data</Button>
           </div>
         </CardContent>
       </Card>
