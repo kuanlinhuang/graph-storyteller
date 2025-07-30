@@ -24,9 +24,7 @@ const Index = () => {
                 <Network className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Network Visualizer
-                </h1>
+                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Interactive Network Visualizer</h1>
                 <p className="text-sm text-muted-foreground">Interactive network visualization with D3 and React flow</p>
               </div>
             </div>
@@ -65,7 +63,7 @@ const Index = () => {
               <Card className="shadow-card-custom">
                 <CardHeader>
                   <Upload className="h-8 w-8 text-primary mb-2" />
-                  <CardTitle className="text-lg">Multiple Data Sources</CardTitle>
+                  <CardTitle className="text-lg">Multiple Input Formats</CardTitle>
                   <CardDescription>Upload JSON files or convert CSV/tabular data as network inputs.</CardDescription>
                 </CardHeader>
               </Card>
@@ -74,7 +72,7 @@ const Index = () => {
                 <CardHeader>
                   <Network className="h-8 w-8 text-primary mb-2" />
                   <CardTitle className="text-lg">D3.js Force & React Flow Layout</CardTitle>
-                  <CardDescription>Automatic network positioning with physics simulation or React Flow.</CardDescription>
+                  <CardDescription>Automatic positioning with D3 physics simulation or React Flow.</CardDescription>
                 </CardHeader>
               </Card>
               
@@ -82,7 +80,7 @@ const Index = () => {
                 <CardHeader>
                   <Zap className="h-8 w-8 text-primary mb-2" />
                   <CardTitle className="text-lg">Edge Weight Visualization</CardTitle>
-                  <CardDescription>Connection strength indicated by line thickness based on weights.</CardDescription>
+                  <CardDescription>Connection strength indicated by line thickness & transparency.</CardDescription>
                 </CardHeader>
               </Card>
             </div>
