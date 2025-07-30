@@ -15,11 +15,14 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { NetworkNode } from './NetworkNode';
 import { NetworkEdge } from './NetworkEdge';
@@ -243,6 +246,98 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     setSelectedEdges([]);
   }, [selectedNodes, selectedEdges, setNodes, setEdges]);
 
+  const exportSVG = useCallback(() => {
+    // Create a simple SVG representation
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '800');
+    svg.setAttribute('height', '600');
+    svg.setAttribute('viewBox', `0 0 800 600`);
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    
+    // Add background
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('width', '800');
+    rect.setAttribute('height', '600');
+    rect.setAttribute('fill', '#ffffff');
+    svg.appendChild(rect);
+    
+    // Add edges
+    edges.forEach(edge => {
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      const targetNode = nodes.find(n => n.id === edge.target);
+      if (sourceNode && targetNode) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', String(sourceNode.position.x + nodeSize[0]/2));
+        line.setAttribute('y1', String(sourceNode.position.y + nodeSize[0]/2));
+        line.setAttribute('x2', String(targetNode.position.x + nodeSize[0]/2));
+        line.setAttribute('y2', String(targetNode.position.y + nodeSize[0]/2));
+        line.setAttribute('stroke', edgeColor[0]);
+        line.setAttribute('stroke-width', String(edge.style?.strokeWidth || 2));
+        svg.appendChild(line);
+      }
+    });
+    
+    // Add nodes
+    nodes.forEach(node => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', String(node.position.x + nodeSize[0]/2));
+      circle.setAttribute('cy', String(node.position.y + nodeSize[0]/2));
+      circle.setAttribute('r', String(nodeSize[0]/2));
+      circle.setAttribute('fill', 'hsl(var(--primary))');
+      circle.setAttribute('stroke', '#ffffff');
+      circle.setAttribute('stroke-width', '2');
+      svg.appendChild(circle);
+      
+      // Add label
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', String(node.position.x + nodeSize[0]/2));
+      text.setAttribute('y', String(node.position.y + nodeSize[0]/2 + 5));
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', String(fontSize[0]));
+      text.setAttribute('fill', textColor[0]);
+      text.textContent = node.data.label;
+      svg.appendChild(text);
+    });
+    
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'network-reactflow.svg';
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success('SVG exported successfully');
+  }, [nodes, edges, nodeSize, fontSize, textColor, edgeColor]);
+
+  const exportPDF = useCallback(async () => {
+    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
+    if (!reactFlowElement) return;
+
+    try {
+      const canvas = await html2canvas(reactFlowElement, {
+        backgroundColor: '#ffffff',
+        scale: 2
+      });
+      
+      const pdf = new jsPDF('landscape');
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 297; // A4 landscape width
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save('network-reactflow.pdf');
+      
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Failed to export PDF');
+    }
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
@@ -272,6 +367,17 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
               </Button>
               <Button onClick={arrangeInGrid} variant="secondary" size="sm">
                 Grid Layout
+              </Button>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={exportSVG} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export SVG
+              </Button>
+              <Button onClick={exportPDF} variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Export PDF
               </Button>
             </div>
             

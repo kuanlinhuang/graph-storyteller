@@ -120,7 +120,7 @@ const Index = () => {
             </div>
 
             {/* Data Management - Takes 1/4 of the space, always visible */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-4">
               <Card className="h-fit">
                 <CardHeader>
                   <CardTitle>Data Management</CardTitle>
@@ -166,6 +166,26 @@ const Index = () => {
                       <TabularDataParser onDataLoaded={handleDataLoaded} />
                     </TabsContent>
                   </Tabs>
+                </CardContent>
+              </Card>
+
+              {/* Citation Card */}
+              <Card className="h-fit">
+                <CardHeader>
+                  <CardTitle className="text-sm">Citation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xs text-muted-foreground space-y-2">
+                    <p className="font-medium">
+                      "Interactive Network Visualizer"
+                    </p>
+                    <p>
+                      Kuan-lin Huang 2025
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">
+                      (doi: )
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

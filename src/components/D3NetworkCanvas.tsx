@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { NetworkData } from './NetworkCanvas';
 
@@ -232,6 +235,49 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
     toast.success('Graph centered');
   }, [simulation]);
 
+  const exportSVG = useCallback(() => {
+    const svgElement = svgRef.current;
+    if (!svgElement) return;
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'network-d3.svg';
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success('SVG exported successfully');
+  }, []);
+
+  const exportPDF = useCallback(async () => {
+    const svgElement = svgRef.current;
+    if (!svgElement) return;
+
+    try {
+      const canvas = await html2canvas(svgElement as any, {
+        backgroundColor: '#ffffff',
+        scale: 2
+      });
+      
+      const pdf = new jsPDF('landscape');
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 297; // A4 landscape width
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save('network-d3.pdf');
+      
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Failed to export PDF');
+    }
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* Controls */}
@@ -243,6 +289,17 @@ export const D3NetworkCanvas = ({ data, onDataChange }: D3NetworkCanvasProps) =>
             </Button>
             <Button onClick={centerGraph} size="sm" variant="outline">
               Center Graph
+            </Button>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={exportSVG} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export SVG
+            </Button>
+            <Button onClick={exportPDF} variant="outline" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              Export PDF
             </Button>
           </div>
           
