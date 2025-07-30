@@ -126,16 +126,14 @@ const Index = () => {
               <Card className="h-fit">
                 <CardHeader>
                   <CardTitle>Data Management</CardTitle>
-                  <CardDescription>
-                    Manage your network data and upload new datasets
-                  </CardDescription>
+                  <CardDescription>Manage your network data</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="current" className="space-y-4">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="current">Current</TabsTrigger>
-                      <TabsTrigger value="upload">Upload</TabsTrigger>
-                      <TabsTrigger value="tabular">Convert</TabsTrigger>
+                      <TabsTrigger value="upload">New JSON</TabsTrigger>
+                      <TabsTrigger value="tabular">New CSV</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="current" className="space-y-4">
