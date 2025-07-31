@@ -370,16 +370,6 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
               </Button>
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={exportSVG} variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export SVG
-              </Button>
-              <Button onClick={exportPDF} variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
-            </div>
             
             <div className="flex gap-2 items-center">
               <Badge variant="secondary">{nodes.length} nodes</Badge>

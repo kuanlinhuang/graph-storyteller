@@ -174,7 +174,9 @@ API1,Database1,5,Query`;
           </div>
           
           <div className="flex gap-2">
-            <Button onClick={parseCsvData}>Parse CSV</Button>
+            <Button onClick={parseCsvData} disabled={!csvInput.trim()}>
+              {csvInput.trim() ? 'Parse CSV' : 'Enter data first to parse'}
+            </Button>
             <Button onClick={loadSampleCsv} variant="outline">Load Sample Data</Button>
           </div>
         </CardContent>
@@ -240,8 +242,14 @@ API1,Database1,5,Query`;
               </div>
             </div>
             
-            <Button onClick={convertToNetwork} className="w-full">
-              Convert to Network
+            <Button 
+              onClick={convertToNetwork} 
+              className="w-full"
+              disabled={!sourceColumn || !targetColumn}
+            >
+              {(!sourceColumn || !targetColumn) 
+                ? 'Select source and target columns first' 
+                : 'Convert to Network'}
             </Button>
           </CardContent>
         </Card>}

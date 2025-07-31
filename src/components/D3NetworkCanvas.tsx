@@ -205,13 +205,6 @@ export const D3NetworkCanvas = ({
             </Button>
           </div>
 
-          <div className="flex gap-2">
-            <Button onClick={exportSVG} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export SVG
-            </Button>
-            
-          </div>
           
           <div className="flex items-center gap-2">
             <Label className="text-sm">Force:</Label>
@@ -262,10 +255,22 @@ export const D3NetworkCanvas = ({
       </Card>
 
       {/* Network Canvas */}
-      <Card className="p-4">
+      <Card className="p-4 relative">
         <svg ref={svgRef} width={800} height={500} style={{
         border: '1px solid hsl(var(--border))'
       }} className="rounded-lg w-full" />
+      
+        {/* Export buttons positioned at top right */}
+        <div className="absolute top-6 right-6 flex gap-2">
+          <Button onClick={exportSVG} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export SVG
+          </Button>
+          <Button onClick={exportPDF} variant="outline" size="sm">
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+        </div>
       </Card>
 
       {/* Selected Node Info */}

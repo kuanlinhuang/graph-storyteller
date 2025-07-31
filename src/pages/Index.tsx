@@ -175,14 +175,17 @@ const Index = () => {
                   <CardTitle className="text-sm">Citation</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xs text-muted-foreground space-y-2">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <p className="font-semibold text-foreground">
+                      Please Cite:
+                    </p>
                     <p className="font-medium">
                       "Interactive Network Visualizer"
                     </p>
                     <p>
                       Kuan-lin Huang 2025
                     </p>
-                    <p className="text-xs text-muted-foreground/70">
+                    <p className="text-sm text-muted-foreground/70">
                       (doi: )
                     </p>
                   </div>
