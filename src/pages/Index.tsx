@@ -83,7 +83,7 @@ const Index = () => {
               <h2 className="text-3xl font-bold mb-4">
                 Visualize Your Network Data
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Upload network files, convert tabular data, and create interactive visualizations. Visualize your favorite network with D3.js force-directed and React flow layouts.</p>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Upload network files, convert tabular data, and create interactive visualizations. Visualize your favorite network with D3.js force-directed and React flow layouts.</p>
             </div>
 
             {/* Features */}

@@ -11,11 +11,12 @@ import { Edit3, Info } from 'lucide-react';
 
 interface NetworkNodeData {
   label: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   nodeType: string;
+  textColor?: string;
 }
 
-export const NetworkNode = memo((props: any) => {
+export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
   const { id, data, selected } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data?.label || '');

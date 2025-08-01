@@ -13,7 +13,7 @@ interface NetworkEdgeData {
   edgeType: string;
 }
 
-export const NetworkEdge = memo((props: any) => {
+export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
   const {
     id,
     sourceX,

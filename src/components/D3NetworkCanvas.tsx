@@ -18,7 +18,7 @@ interface D3Node extends d3.SimulationNodeDatum {
   id: string;
   label: string;
   type?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   radius: number;
 }
 interface D3Link extends d3.SimulationLinkDatum<D3Node> {
@@ -111,7 +111,7 @@ export const D3NetworkCanvas = ({
     const nodeLabels = g.selectAll<SVGTextElement, D3Node>('.node-label').data(nodes).enter().append('text').attr('class', 'node-label').text(d => d.label).style('font-size', `${fontSize[0]}px`).style('font-weight', '500').style('fill', textColor[0]).style('text-anchor', 'middle').style('dominant-baseline', 'central').style('pointer-events', 'none').style('user-select', 'none');
 
     // Create simulation
-    const sim = d3.forceSimulation<D3Node>(nodes).force('link', d3.forceLink<D3Node, D3Link>(links).id(d => d.id).distance(linkDistance[0])).force('charge', d3.forceManyBody().strength(forceStrength[0])).force('center', d3.forceCenter(400, 250)).force('collision', d3.forceCollide().radius((d: any) => (d as D3Node).radius + 2));
+    const sim = d3.forceSimulation<D3Node>(nodes).force('link', d3.forceLink<D3Node, D3Link>(links).id(d => d.id).distance(linkDistance[0])).force('charge', d3.forceManyBody().strength(forceStrength[0])).force('center', d3.forceCenter(400, 250)).force('collision', d3.forceCollide().radius((d: D3Node) => d.radius + 2));
     sim.on('tick', () => {
       linkElements.attr('x1', d => (d.source as D3Node).x!).attr('y1', d => (d.source as D3Node).y!).attr('x2', d => (d.target as D3Node).x!).attr('y2', d => (d.target as D3Node).y!);
       nodeElements.attr('cx', d => d.x!).attr('cy', d => d.y!);
@@ -121,6 +121,7 @@ export const D3NetworkCanvas = ({
     return () => {
       sim.stop();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, links, forceStrength, linkDistance, nodeSize, fontSize, showDirected, textColor, edgeColor]);
   const getNodeColor = (type?: string) => {
     switch (type) {
@@ -176,7 +177,7 @@ export const D3NetworkCanvas = ({
     const svgElement = svgRef.current;
     if (!svgElement) return;
     try {
-      const canvas = await html2canvas(svgElement as any, {
+      const canvas = await html2canvas(svgElement as HTMLElement, {
         backgroundColor: '#ffffff',
         scale: 2
       });

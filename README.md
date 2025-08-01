@@ -233,7 +233,7 @@ npm run build
 #### Static Hosting (Recommended)
 - **Vercel**: Connect your GitHub repo for automatic deployments
 - **Netlify**: Drag & drop the `dist` folder or connect via Git
-- **GitHub Pages**: Use GitHub Actions for automated deployment
+- **GitHub Pages**: Use GitHub Actions for automated deployment ([Setup Guide](GITHUB_PAGES_SETUP.md))
 - **AWS S3**: Upload `dist` contents to S3 bucket with static hosting
 
 #### Docker Deployment

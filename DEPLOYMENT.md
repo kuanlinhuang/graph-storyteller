@@ -24,10 +24,16 @@ npm run build
 # Or connect your GitHub repo at netlify.com
 ```
 
-### 3. GitHub Pages
-- Push your code to GitHub
-- Enable GitHub Actions in your repository
-- The included workflow will automatically deploy to GitHub Pages
+### 3. GitHub Pages (Configured)
+1. **Push your code to GitHub**
+2. **Enable GitHub Pages**:
+   - Go to your repository Settings
+   - Navigate to "Pages" in the left sidebar
+   - Under "Source", select "GitHub Actions"
+3. **The workflow will automatically deploy** when you push to main/master branch
+4. **Your site will be available at**: `https://yourusername.github.io/graph-storyteller/`
+
+**Note**: The project is pre-configured with the correct base path for GitHub Pages.
 
 ### 4. Docker
 ```bash

@@ -32,7 +32,7 @@ export interface NetworkData {
     id: string;
     label: string;
     type?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     position?: { x: number; y: number };
   }>;
   edges: Array<{
