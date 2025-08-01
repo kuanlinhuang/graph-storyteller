@@ -1,18 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NetworkCanvas, NetworkData } from '@/components/NetworkCanvas';
 import { FileUploader } from '@/components/FileUploader';
-import { Network, Upload, Zap } from 'lucide-react';
+import { Network, Upload, Zap, BarChart3 } from 'lucide-react';
 import { D3NetworkCanvas } from '@/components/D3NetworkCanvas';
 import { TabularDataParser } from '@/components/TabularDataParser';
+
+const COUNTER_STORAGE_KEY = 'graph-storyteller-network-count';
+
 const Index = () => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
   const [visualizationType, setVisualizationType] = useState<'react-flow' | 'd3'>('d3');
+  const [networkCount, setNetworkCount] = useState<number>(0);
+
+  // Load counter from localStorage on component mount
+  useEffect(() => {
+    const savedCount = localStorage.getItem(COUNTER_STORAGE_KEY);
+    if (savedCount) {
+      setNetworkCount(parseInt(savedCount, 10));
+    }
+  }, []);
+
+  // Save counter to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(COUNTER_STORAGE_KEY, networkCount.toString());
+  }, [networkCount]);
+
   const handleDataLoaded = (data: NetworkData) => {
     setNetworkData(data);
+    // Increment counter when new network data is loaded
+    setNetworkCount(prev => prev + 1);
   };
   return <div className="min-h-screen bg-canvas">
       {/* Header */}
@@ -30,6 +50,14 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-4">
+              {/* Network Counter */}
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">
+                  {networkCount} network{networkCount !== 1 ? 's' : ''} visualized
+                </span>
+              </div>
+
               {networkData && <div className="flex gap-2">
                   <Badge variant="secondary">
                     {networkData.nodes.length} nodes
@@ -55,7 +83,7 @@ const Index = () => {
               <h2 className="text-3xl font-bold mb-4">
                 Visualize Your Network Data
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Upload network files, convert tabular data, and create interactive visualizations. Visualize your favoriate network with D3.js force-directed and React flow layouts.</p>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Upload network files, convert tabular data, and create interactive visualizations. Visualize your favorite network with D3.js force-directed and React flow layouts.</p>
             </div>
 
             {/* Features */}

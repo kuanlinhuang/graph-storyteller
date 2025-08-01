@@ -1,7 +1,11 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "graph-storyteller",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Interactive network visualization tool with D3.js and React Flow",
+  "keywords": ["network", "visualization", "d3", "react", "graph", "data-viz"],
+  "author": "Graph Storyteller Team",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
