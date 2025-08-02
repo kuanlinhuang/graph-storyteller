@@ -7,13 +7,7 @@ import {
 } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
 
-interface NetworkEdgeData {
-  label?: string;
-  weight?: number;
-  edgeType: string;
-}
-
-export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
+export const NetworkEdge = memo((props: EdgeProps) => {
   const {
     id,
     sourceX,
@@ -27,6 +21,7 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
     selected,
     markerEnd,
   } = props;
+  
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -37,8 +32,10 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
   });
 
   const getEdgeStyle = () => {
+    const weight = (data as any)?.weight || 1;
+    const strokeWidth = typeof weight === 'number' ? Math.max(1, weight * 2) : 2;
     const baseStyle = {
-      strokeWidth: Math.max(1, (data?.weight || 1) * 2),
+      strokeWidth,
       ...style,
     };
 
@@ -46,7 +43,7 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
       return {
         ...baseStyle,
         stroke: 'hsl(var(--edge-selected))',
-        strokeWidth: baseStyle.strokeWidth + 1,
+        strokeWidth: (typeof baseStyle.strokeWidth === 'number' ? baseStyle.strokeWidth : 2) + 1,
       };
     }
 
@@ -69,6 +66,11 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
     }
   };
 
+  const edgeData = data as any;
+  const label = edgeData?.label;
+  const weight = edgeData?.weight;
+  const edgeType = edgeData?.edgeType || 'default';
+
   return (
     <>
       <BaseEdge 
@@ -77,7 +79,7 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
         style={getEdgeStyle()} 
       />
       <EdgeLabelRenderer>
-        {(data?.label || data?.weight) && (
+        {(label || weight) && (
           <div
             style={{
               position: 'absolute',
@@ -88,20 +90,20 @@ export const NetworkEdge = memo((props: EdgeProps<NetworkEdgeData>) => {
             className="nodrag nopan"
           >
             <div className="flex flex-col items-center gap-1">
-              {data?.label && (
+              {label && (
                 <Badge 
                   variant="outline" 
-                  className={`text-xs ${getEdgeTypeColor(data?.edgeType || 'default')} bg-background/90 backdrop-blur-sm`}
+                  className={`text-xs ${getEdgeTypeColor(edgeType)} bg-background/90 backdrop-blur-sm`}
                 >
-                  {data.label}
+                  {String(label)}
                 </Badge>
               )}
-              {data?.weight && data.weight !== 1 && (
+              {weight && weight !== 1 && (
                 <Badge 
                   variant="secondary" 
                   className="text-xs bg-background/90 backdrop-blur-sm"
                 >
-                  {data.weight}
+                  {String(weight)}
                 </Badge>
               )}
             </div>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -50,14 +50,6 @@ interface NetworkCanvasProps {
   onDataChange?: (data: NetworkData) => void;
 }
 
-const nodeTypes = {
-  network: NetworkNode,
-};
-
-const edgeTypes = {
-  network: NetworkEdge,
-};
-
 export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -68,6 +60,14 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [showDirected, setShowDirected] = useState(true);
   const [textColor, setTextColor] = useState(['#000000']);
   const [edgeColor, setEdgeColor] = useState(['#3b82f6']);
+
+  const nodeTypes = useMemo(() => ({
+    network: NetworkNode,
+  }), []);
+
+  const edgeTypes = useMemo(() => ({
+    network: NetworkEdge,
+  }), []);
 
   // Convert network data to React Flow format
   useEffect(() => {
@@ -261,7 +261,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     rect.setAttribute('fill', '#ffffff');
     svg.appendChild(rect);
     
-    // Add edges
+    // Add edges first (so they appear behind nodes)
     edges.forEach(edge => {
       const sourceNode = nodes.find(n => n.id === edge.source);
       const targetNode = nodes.find(n => n.id === edge.target);
@@ -273,17 +273,37 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         line.setAttribute('y2', String(targetNode.position.y + nodeSize[0]/2));
         line.setAttribute('stroke', edgeColor[0]);
         line.setAttribute('stroke-width', String(edge.style?.strokeWidth || 2));
+        line.setAttribute('opacity', '0.7');
         svg.appendChild(line);
+        
+        // Add arrow marker for directed edges
+        if (showDirected) {
+          const dx = targetNode.position.x - sourceNode.position.x;
+          const dy = targetNode.position.y - sourceNode.position.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const unitX = dx / length;
+          const unitY = dy / length;
+          
+          // Arrow position (near target node)
+          const arrowX = targetNode.position.x + nodeSize[0]/2 - unitX * (nodeSize[0]/2 + 10);
+          const arrowY = targetNode.position.y + nodeSize[0]/2 - unitY * (nodeSize[0]/2 + 10);
+          
+          const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          arrow.setAttribute('points', '0,-5 10,0 0,5');
+          arrow.setAttribute('fill', edgeColor[0]);
+          arrow.setAttribute('transform', `translate(${arrowX},${arrowY}) rotate(${Math.atan2(dy, dx) * 180 / Math.PI})`);
+          svg.appendChild(arrow);
+        }
       }
     });
     
-    // Add nodes
+    // Add nodes on top
     nodes.forEach(node => {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       circle.setAttribute('cx', String(node.position.x + nodeSize[0]/2));
       circle.setAttribute('cy', String(node.position.y + nodeSize[0]/2));
       circle.setAttribute('r', String(nodeSize[0]/2));
-      circle.setAttribute('fill', 'hsl(var(--primary))');
+      circle.setAttribute('fill', 'hsl(220, 70%, 50%)');
       circle.setAttribute('stroke', '#ffffff');
       circle.setAttribute('stroke-width', '2');
       svg.appendChild(circle);
@@ -311,30 +331,50 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     URL.revokeObjectURL(url);
     
     toast.success('SVG exported successfully');
-  }, [nodes, edges, nodeSize, fontSize, textColor, edgeColor]);
+  }, [nodes, edges, nodeSize, fontSize, textColor, edgeColor, showDirected]);
 
   const exportPDF = useCallback(async () => {
-    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
-    if (!reactFlowElement) return;
-
     try {
-      const canvas = await html2canvas(reactFlowElement, {
+      const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
+      if (!reactFlowElement) {
+        toast.error('Could not find React Flow element');
+        return;
+      }
+      
+      // Create a temporary container for better rendering
+      const container = document.createElement('div');
+      container.style.width = reactFlowElement.offsetWidth + 'px';
+      container.style.height = reactFlowElement.offsetHeight + 'px';
+      container.style.backgroundColor = '#ffffff';
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      document.body.appendChild(container);
+      
+      // Clone the React Flow element
+      const clonedElement = reactFlowElement.cloneNode(true) as HTMLElement;
+      container.appendChild(clonedElement);
+      
+      const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
       });
+      
+      // Clean up
+      document.body.removeChild(container);
       
       const pdf = new jsPDF('landscape');
       const imgData = canvas.toDataURL('image/png');
       const imgWidth = 297; // A4 landscape width
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+      const imgHeight = canvas.height * imgWidth / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save('network-reactflow.pdf');
-      
       toast.success('PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      toast.error('Failed to export PDF');
+      toast.error('Failed to export PDF. Try using SVG export instead.');
     }
   }, []);
 
@@ -444,7 +484,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
       </Card>
 
       {/* React Flow Canvas */}
-      <Card className="flex-1 overflow-hidden shadow-card-custom">
+      <Card className="flex-1 overflow-hidden shadow-card-custom relative">
         <div style={{ width: '100%', height: '600px' }}>
           <ReactFlow
           nodes={nodes}
@@ -477,6 +517,18 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
             color="hsl(var(--border))"
           />
         </ReactFlow>
+        </div>
+        
+        {/* Export buttons positioned at top right */}
+        <div className="absolute top-6 right-6 flex gap-2">
+          <Button onClick={exportSVG} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export SVG
+          </Button>
+          <Button onClick={exportPDF} variant="outline" size="sm">
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
         </div>
       </Card>
     </div>

@@ -160,8 +160,22 @@ export const D3NetworkCanvas = ({
   const exportSVG = useCallback(() => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
+    
+    // Clone the SVG to avoid modifying the original
+    const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+    
+    // Add inline CSS to preserve styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .link { stroke-opacity: 0.7; }
+      .node { stroke-width: 2; cursor: pointer; }
+      .node-label { font-weight: 500; text-anchor: middle; dominant-baseline: central; }
+      #arrowhead { opacity: 0.7; }
+    `;
+    clonedSvg.insertBefore(style, clonedSvg.firstChild);
+    
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement);
+    const svgString = serializer.serializeToString(clonedSvg);
     const blob = new Blob([svgString], {
       type: 'image/svg+xml'
     });
@@ -176,11 +190,30 @@ export const D3NetworkCanvas = ({
   const exportPDF = useCallback(async () => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
+    
     try {
-      const canvas = await html2canvas(svgElement as HTMLElement, {
+      // Create a container div for proper rendering
+      const container = document.createElement('div');
+      container.style.width = '800px';
+      container.style.height = '500px';
+      container.style.backgroundColor = '#ffffff';
+      document.body.appendChild(container);
+      
+      // Clone and append SVG to container
+      const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+      clonedSvg.style.backgroundColor = '#ffffff';
+      container.appendChild(clonedSvg);
+      
+      const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
       });
+      
+      // Clean up
+      document.body.removeChild(container);
+      
       const pdf = new jsPDF('landscape');
       const imgData = canvas.toDataURL('image/png');
       const imgWidth = 297; // A4 landscape width
@@ -190,7 +223,7 @@ export const D3NetworkCanvas = ({
       toast.success('PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      toast.error('Failed to export PDF');
+      toast.error('Failed to export PDF. Try using SVG export instead.');
     }
   }, []);
   return <div className="space-y-4">

@@ -9,17 +9,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator';
 import { Edit3, Info } from 'lucide-react';
 
-interface NetworkNodeData {
-  label: string;
-  metadata?: Record<string, unknown>;
-  nodeType: string;
-  textColor?: string;
-}
-
-export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
+export const NetworkNode = memo((props: NodeProps) => {
   const { id, data, selected } = props;
   const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(data?.label || '');
+  
+  const nodeData = data as any;
+  const label = nodeData?.label || 'Node';
+  const nodeType = nodeData?.nodeType || 'default';
+  const textColor = nodeData?.textColor || '#000000';
+  const metadata = nodeData?.metadata;
+  
+  const [editLabel, setEditLabel] = useState(String(label));
 
   const handleLabelSave = () => {
     // In a real app, you'd update the node data here
@@ -57,23 +57,23 @@ export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
         {/* Node Type Badge */}
         <Badge 
           variant="outline" 
-          className={`text-xs ${getNodeTypeColor(data?.nodeType || 'default')}`}
+          className={`text-xs ${getNodeTypeColor(nodeType)}`}
         >
-          {data?.nodeType || 'default'}
+          {String(nodeType)}
         </Badge>
 
         {/* Node Label */}
         {isEditing ? (
           <div className="flex flex-col gap-2 w-full">
             <Input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
+              value={editLabel}
+              onChange={(e) => setEditLabel(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleLabelSave();
                 if (e.key === 'Escape') setIsEditing(false);
               }}
               className="text-center text-sm"
-              style={{ color: data?.textColor }}
+              style={{ color: textColor }}
               autoFocus
             />
             <div className="flex gap-1">
@@ -94,9 +94,9 @@ export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
           <div className="flex items-center gap-2 w-full justify-center">
             <span 
               className="text-sm font-medium text-center min-w-0 flex-1"
-              style={{ color: data?.textColor }}
+              style={{ color: textColor }}
             >
-              {data?.label || 'Node'}
+              {String(label)}
             </span>
             <Button
               size="sm"
@@ -110,7 +110,7 @@ export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
         )}
 
         {/* Metadata Info */}
-        {data?.metadata && Object.keys(data.metadata).length > 0 && (
+        {metadata && typeof metadata === 'object' && Object.keys(metadata).length > 0 && (
           <Popover>
             <PopoverTrigger asChild>
               <Button size="sm" variant="ghost" className="p-1 h-auto">
@@ -126,18 +126,18 @@ export const NetworkNode = memo((props: NodeProps<NetworkNodeData>) => {
                 <div className="space-y-2">
                   <div>
                     <Label className="text-xs text-muted-foreground">ID</Label>
-                    <p className="text-sm font-mono">{id}</p>
+                    <p className="text-sm font-mono">{String(id)}</p>
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Type</Label>
-                    <p className="text-sm">{data?.nodeType || 'default'}</p>
+                    <p className="text-sm">{String(nodeType)}</p>
                   </div>
-                  {Object.entries(data?.metadata || {}).map(([key, value]) => (
+                  {Object.entries(metadata).map(([key, value]) => (
                     <div key={key}>
                       <Label className="text-xs text-muted-foreground capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </Label>
-                      <p className="text-sm">{String(value)}</p>
+                      <p className="text-sm">{String(value || '')}</p>
                     </div>
                   ))}
                 </div>
