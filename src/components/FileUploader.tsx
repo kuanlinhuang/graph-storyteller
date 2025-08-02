@@ -238,20 +238,9 @@ export const FileUploader = ({
           {/* Action Buttons */}
           <div className="flex gap-2 justify-center">
             <Button onClick={loadSampleData} variant="outline">Load Sample Data</Button>
-            <Button variant="outline" onClick={() => {
-            fetch('/sample-3layer-network.json').then(res => res.json()).then(data => {
-              onFileUpload(data);
-              toast.success('Sample 3-layer network loaded');
-            }).catch(err => {
-              console.error('Error loading sample:', err);
-              toast.error('Failed to load sample network');
-            });
-          }}>Load 3-Layer Network Sample</Button>
+            
             {currentData && <>
-                <Button onClick={exportData} variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Data
-                </Button>
+                
                 <Button onClick={clearData} variant="outline">
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear Data
