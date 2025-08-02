@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // For GitHub Pages, always use the repository name as base path in production
-  const base = mode === 'production' ? '/graph-storyteller/' : '/';
+  const base = '/';
 
   console.log(`Vite mode: ${mode}`);
   console.log(`Vite base path: ${base}`);
