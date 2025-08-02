@@ -4,15 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  // For GitHub Pages, always use the repository name as base path in production
-  const base = '/';
-
-  console.log(`Vite mode: ${mode}`);
-  console.log(`Vite base path: ${base}`);
-
-  return {
-    base,
+export default defineConfig(({ mode }) => ({
+  base: '/',
   server: {
     host: "::",
     port: 8080,
@@ -22,10 +15,9 @@ export default defineConfig(({ mode }) => {
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-  };
-});
+  },
+}));

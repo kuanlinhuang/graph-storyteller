@@ -230,22 +230,28 @@ npm run build
 
 ### Deployment Options
 
-#### Static Hosting (Recommended)
+#### GitHub Pages (Recommended)
+This project is configured for GitHub Pages deployment:
+
+1. **Enable GitHub Pages**:
+   - Go to repository Settings > Pages
+   - Set Source to "GitHub Actions"
+
+2. **Automatic Deployment**:
+   - Push to main/master branch triggers deployment
+   - Workflow builds and deploys automatically
+   - Site available at `https://yourusername.github.io/graph-storyteller/`
+
+#### Other Static Hosting
 - **Vercel**: Connect your GitHub repo for automatic deployments
 - **Netlify**: Drag & drop the `dist` folder or connect via Git
-- **GitHub Pages**: Use GitHub Actions for automated deployment ([Setup Guide](GITHUB_PAGES_SETUP.md))
 - **AWS S3**: Upload `dist` contents to S3 bucket with static hosting
 
-#### Docker Deployment
-```dockerfile
-FROM nginx:alpine
-COPY dist/ /usr/share/nginx/html/
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+#### Manual Deployment
+```bash
+npm run build
+# Upload 'dist' folder contents to any static hosting service
 ```
-
-#### Environment Variables
-No environment variables required for basic functionality. All configuration is handled client-side.
 
 ### Performance Optimization
 
@@ -293,7 +299,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **D3.js Community**: For the incredible visualization library
 - **React Flow Team**: For the excellent node-based editor
 - **shadcn**: For the beautiful UI component library
-- **Vercel**: For the amazing development and deployment platform
+- **GitHub Pages**: For free and reliable static hosting
 
 ## 📞 Support
 
