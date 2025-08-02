@@ -8,9 +8,7 @@ import { FileUploader } from '@/components/FileUploader';
 import { Network, Upload, Zap, BarChart3 } from 'lucide-react';
 import { D3NetworkCanvas } from '@/components/D3NetworkCanvas';
 import { TabularDataParser } from '@/components/TabularDataParser';
-
 const COUNTER_STORAGE_KEY = 'graph-storyteller-network-count';
-
 const Index = () => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
   const [visualizationType, setVisualizationType] = useState<'react-flow' | 'd3'>('d3');
@@ -28,7 +26,6 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem(COUNTER_STORAGE_KEY, networkCount.toString());
   }, [networkCount]);
-
   const handleDataLoaded = (data: NetworkData) => {
     setNetworkData(data);
     // Increment counter when new network data is loaded
@@ -66,10 +63,7 @@ const Index = () => {
                     {networkData.edges.length} edges
                   </Badge>
                 </div>}
-              <Button variant="outline" size="sm">
-                <Zap className="h-4 w-4 mr-2" />
-                Quick Start
-              </Button>
+              
             </div>
           </div>
         </div>
