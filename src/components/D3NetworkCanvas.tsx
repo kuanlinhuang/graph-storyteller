@@ -206,9 +206,14 @@ export const D3NetworkCanvas = ({
       
       const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 4,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        width: 800,
+        height: 500,
+        windowWidth: 800,
+        windowHeight: 500
       });
       
       // Clean up
