@@ -13,6 +13,7 @@ export const NetworkNode = memo((props: NodeProps) => {
   const { id, data, selected } = props;
   const { setNodes } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingType, setIsEditingType] = useState(false);
   const [isResizable, setIsResizable] = useState(false);
   
   const nodeData = data as any;
@@ -22,6 +23,7 @@ export const NetworkNode = memo((props: NodeProps) => {
   const metadata = nodeData?.metadata;
   
   const [editLabel, setEditLabel] = useState(String(label));
+  const [editType, setEditType] = useState(String(nodeType));
 
   const handleLabelSave = () => {
     setNodes((nodes) =>
@@ -32,6 +34,17 @@ export const NetworkNode = memo((props: NodeProps) => {
       )
     );
     setIsEditing(false);
+  };
+
+  const handleTypeSave = () => {
+    setNodes((nodes) =>
+      nodes.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, nodeType: editType } }
+          : node
+      )
+    );
+    setIsEditingType(false);
   };
 
   const getNodeStyle = () => {
@@ -77,12 +90,43 @@ export const NetworkNode = memo((props: NodeProps) => {
         </Button>
 
         {/* Node Type Badge */}
-        <Badge 
-          variant="outline" 
-          className={`text-xs ${getNodeTypeColor(nodeType)}`}
-        >
-          {String(nodeType)}
-        </Badge>
+        {isEditingType ? (
+          <div className="flex flex-col gap-2 w-full">
+            <Input
+              value={editType}
+              onChange={(e) => setEditType(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTypeSave();
+                if (e.key === 'Escape') setIsEditingType(false);
+              }}
+              className="text-center text-xs"
+              placeholder="Enter node type"
+              autoFocus
+            />
+            <div className="flex gap-1">
+              <Button size="sm" onClick={handleTypeSave} className="flex-1">
+                Save
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => setIsEditingType(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Badge 
+            variant="outline" 
+            className={`text-xs cursor-pointer hover:opacity-80 transition-opacity ${getNodeTypeColor(nodeType)}`}
+            onDoubleClick={() => setIsEditingType(true)}
+            title="Double-click to edit type"
+          >
+            {String(nodeType)}
+          </Badge>
+        )}
 
         {/* Node Label */}
         {isEditing ? (
