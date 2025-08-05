@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, NodeResizer, useReactFlow } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { Edit3, Info } from 'lucide-react';
+import { Edit3, Info, Move } from 'lucide-react';
 
 export const NetworkNode = memo((props: NodeProps) => {
   const { id, data, selected } = props;
+  const { setNodes } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
+  const [isResizable, setIsResizable] = useState(false);
   
   const nodeData = data as any;
   const label = nodeData?.label || 'Node';
@@ -22,7 +24,13 @@ export const NetworkNode = memo((props: NodeProps) => {
   const [editLabel, setEditLabel] = useState(String(label));
 
   const handleLabelSave = () => {
-    // In a real app, you'd update the node data here
+    setNodes((nodes) =>
+      nodes.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, label: editLabel } }
+          : node
+      )
+    );
     setIsEditing(false);
   };
 
@@ -53,7 +61,21 @@ export const NetworkNode = memo((props: NodeProps) => {
 
   return (
     <Card className={getNodeStyle()}>
-      <div className="flex flex-col items-center gap-2">
+      {/* Node Resizer */}
+      {isResizable && <NodeResizer minWidth={80} minHeight={60} />}
+      
+      <div className="flex flex-col items-center gap-2 group">
+        {/* Resize Toggle Button */}
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => setIsResizable(!isResizable)}
+          className="absolute -top-2 -right-2 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          title={isResizable ? "Disable resize" : "Enable resize"}
+        >
+          <Move className="h-3 w-3" />
+        </Button>
+
         {/* Node Type Badge */}
         <Badge 
           variant="outline" 
@@ -91,21 +113,13 @@ export const NetworkNode = memo((props: NodeProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2 w-full justify-center">
-            <span 
-              className="text-sm font-medium text-center min-w-0 flex-1"
-              style={{ color: textColor }}
-            >
-              {String(label)}
-            </span>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsEditing(true)}
-              className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Edit3 className="h-3 w-3" />
-            </Button>
+          <div 
+            className="text-sm font-medium text-center min-w-0 cursor-text px-2 py-1 rounded hover:bg-muted/50 transition-colors"
+            style={{ color: textColor }}
+            onDoubleClick={() => setIsEditing(true)}
+            title="Double-click to edit"
+          >
+            {String(label)}
           </div>
         )}
 

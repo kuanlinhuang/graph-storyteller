@@ -89,10 +89,11 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         textColor: textColor[0],
       },
       style: {
-        width: nodeSize[0],
-        height: nodeSize[0],
+        width: Math.max(120, nodeSize[0]),
+        height: Math.max(80, nodeSize[0]),
         fontSize: fontSize[0],
       },
+      resizable: true,
     }));
 
     const flowEdges: Edge[] = data.edges.map((edge) => ({
