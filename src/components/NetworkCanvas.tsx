@@ -55,10 +55,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
-  const [nodeSize, setNodeSize] = useState([40]);
-  const [fontSize, setFontSize] = useState([12]);
   const [showDirected, setShowDirected] = useState(true);
-  const [textColor, setTextColor] = useState(['#000000']);
   const [edgeColor, setEdgeColor] = useState(['#3b82f6']);
 
   const nodeTypes = useMemo(() => ({
@@ -84,14 +81,11 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         label: node.label,
         metadata: node.metadata,
         nodeType: node.type || 'default',
-        nodeSize: nodeSize[0],
-        fontSize: fontSize[0],
-        textColor: textColor[0],
+        textColor: '#000000',
       },
       style: {
-        width: Math.max(120, nodeSize[0]),
-        height: Math.max(80, nodeSize[0]),
-        fontSize: fontSize[0],
+        width: 120,
+        height: 80,
       },
       resizable: true,
     }));
@@ -125,7 +119,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     if (flowNodes.length > 0) {
       toast.success(`Loaded ${flowNodes.length} nodes and ${flowEdges.length} edges`);
     }
-  }, [data, nodeSize, fontSize, showDirected, textColor, edgeColor, setNodes, setEdges]);
+  }, [data, showDirected, edgeColor, setNodes, setEdges]);
 
   // Handle new connections
   const onConnect = useCallback(
@@ -268,10 +262,10 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
       const targetNode = nodes.find(n => n.id === edge.target);
       if (sourceNode && targetNode) {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', String(sourceNode.position.x + nodeSize[0]/2));
-        line.setAttribute('y1', String(sourceNode.position.y + nodeSize[0]/2));
-        line.setAttribute('x2', String(targetNode.position.x + nodeSize[0]/2));
-        line.setAttribute('y2', String(targetNode.position.y + nodeSize[0]/2));
+        line.setAttribute('x1', String(sourceNode.position.x + 60));
+        line.setAttribute('y1', String(sourceNode.position.y + 40));
+        line.setAttribute('x2', String(targetNode.position.x + 60));
+        line.setAttribute('y2', String(targetNode.position.y + 40));
         line.setAttribute('stroke', edgeColor[0]);
         line.setAttribute('stroke-width', String(edge.style?.strokeWidth || 2));
         line.setAttribute('opacity', '0.7');
@@ -286,8 +280,8 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
           const unitY = dy / length;
           
           // Arrow position (near target node)
-          const arrowX = targetNode.position.x + nodeSize[0]/2 - unitX * (nodeSize[0]/2 + 10);
-          const arrowY = targetNode.position.y + nodeSize[0]/2 - unitY * (nodeSize[0]/2 + 10);
+          const arrowX = targetNode.position.x + 60 - unitX * (60 + 10);
+          const arrowY = targetNode.position.y + 40 - unitY * (40 + 10);
           
           const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
           arrow.setAttribute('points', '0,-5 10,0 0,5');
@@ -300,22 +294,24 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     
     // Add nodes on top
     nodes.forEach(node => {
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', String(node.position.x + nodeSize[0]/2));
-      circle.setAttribute('cy', String(node.position.y + nodeSize[0]/2));
-      circle.setAttribute('r', String(nodeSize[0]/2));
-      circle.setAttribute('fill', 'hsl(220, 70%, 50%)');
-      circle.setAttribute('stroke', '#ffffff');
-      circle.setAttribute('stroke-width', '2');
-      svg.appendChild(circle);
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', String(node.position.x));
+      rect.setAttribute('y', String(node.position.y));
+      rect.setAttribute('width', '120');
+      rect.setAttribute('height', '80');
+      rect.setAttribute('fill', 'hsl(220, 70%, 50%)');
+      rect.setAttribute('stroke', '#ffffff');
+      rect.setAttribute('stroke-width', '2');
+      rect.setAttribute('rx', '8');
+      svg.appendChild(rect);
       
       // Add label
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', String(node.position.x + nodeSize[0]/2));
-      text.setAttribute('y', String(node.position.y + nodeSize[0]/2 + 5));
+      text.setAttribute('x', String(node.position.x + 60));
+      text.setAttribute('y', String(node.position.y + 45));
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('font-size', String(fontSize[0]));
-      text.setAttribute('fill', textColor[0]);
+      text.setAttribute('font-size', '12');
+      text.setAttribute('fill', '#ffffff');
       text.textContent = node.data.label;
       svg.appendChild(text);
     });
@@ -332,7 +328,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     URL.revokeObjectURL(url);
     
     toast.success('SVG exported successfully');
-  }, [nodes, edges, nodeSize, fontSize, textColor, edgeColor, showDirected]);
+  }, [nodes, edges, edgeColor, showDirected]);
 
   const exportPDF = useCallback(async () => {
     try {
@@ -428,42 +424,6 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
           {/* Controls */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex items-center gap-2">
-              <Label className="text-sm">Node Size:</Label>
-              <Slider
-                value={nodeSize}
-                onValueChange={setNodeSize}
-                min={0}
-                max={80}
-                step={5}
-                className="w-20"
-              />
-              <span className="text-xs text-muted-foreground w-8">{nodeSize[0]}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Label className="text-sm">Font Size:</Label>
-              <Slider
-                value={fontSize}
-                onValueChange={setFontSize}
-                min={8}
-                max={20}
-                step={1}
-                className="w-20"
-              />
-              <span className="text-xs text-muted-foreground w-8">{fontSize[0]}</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Label className="text-sm">Text Color:</Label>
-              <input
-                type="color"
-                value={textColor[0]}
-                onChange={(e) => setTextColor([e.target.value])}
-                className="w-8 h-8 rounded cursor-pointer"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
               <Label className="text-sm">Edge Color:</Label>
               <input
                 type="color"
@@ -483,6 +443,10 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
               >
                 {showDirected ? "ON" : "OFF"}
               </Button>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              💡 Double-click nodes to edit text, hover to resize
             </div>
           </div>
         </div>
