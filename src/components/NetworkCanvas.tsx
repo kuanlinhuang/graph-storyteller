@@ -446,7 +446,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
             </div>
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              💡 Double-click node type/text to edit, hover to resize
+              💡 Double-click node type/text to edit • Select node & drag corners to resize
             </div>
           </div>
         </div>

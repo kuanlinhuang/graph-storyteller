@@ -14,7 +14,6 @@ export const NetworkNode = memo((props: NodeProps) => {
   const { setNodes } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingType, setIsEditingType] = useState(false);
-  const [isResizable, setIsResizable] = useState(false);
   
   const nodeData = data as any;
   const label = nodeData?.label || 'Node';
@@ -74,20 +73,25 @@ export const NetworkNode = memo((props: NodeProps) => {
 
   return (
     <Card className={getNodeStyle()}>
-      {/* Node Resizer */}
-      {isResizable && <NodeResizer minWidth={80} minHeight={60} />}
+      {/* Node Resizer - Always show on hover for better UX */}
+      <NodeResizer 
+        minWidth={80} 
+        minHeight={60} 
+        isVisible={selected}
+        handleStyle={{
+          backgroundColor: 'hsl(var(--primary))',
+          border: '2px solid white',
+          borderRadius: '2px',
+          width: '8px',
+          height: '8px'
+        }}
+      />
       
       <div className="flex flex-col items-center gap-2 group">
-        {/* Resize Toggle Button */}
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setIsResizable(!isResizable)}
-          className="absolute -top-2 -right-2 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-          title={isResizable ? "Disable resize" : "Enable resize"}
-        >
-          <Move className="h-3 w-3" />
-        </Button>
+        {/* Resize hint that shows on hover */}
+        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity bg-background px-2 py-1 rounded border shadow-sm whitespace-nowrap z-20">
+          Select & drag corners to resize
+        </div>
 
         {/* Node Type Badge */}
         {isEditingType ? (
