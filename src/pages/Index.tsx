@@ -8,28 +8,55 @@ import { FileUploader } from '@/components/FileUploader';
 import { Network, Upload, Zap, BarChart3 } from 'lucide-react';
 import { D3NetworkCanvas } from '@/components/D3NetworkCanvas';
 import { TabularDataParser } from '@/components/TabularDataParser';
+import { getNetworkCounter, incrementNetworkCounter } from '@/lib/supabase';
 const COUNTER_STORAGE_KEY = 'graph-storyteller-network-count';
 const Index = () => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
   const [visualizationType, setVisualizationType] = useState<'react-flow' | 'd3'>('d3');
   const [networkCount, setNetworkCount] = useState<number>(0);
 
-  // Load counter from localStorage on component mount
+  // Load counter from Supabase on component mount
   useEffect(() => {
-    const savedCount = localStorage.getItem(COUNTER_STORAGE_KEY);
-    if (savedCount) {
-      setNetworkCount(parseInt(savedCount, 10));
-    }
+    const loadCounter = async () => {
+      try {
+        const count = await getNetworkCounter();
+        setNetworkCount(count);
+      } catch (error) {
+        console.error('Failed to load counter from Supabase:', error);
+        // Fallback to localStorage
+        const savedCount = localStorage.getItem(COUNTER_STORAGE_KEY);
+        if (savedCount) {
+          setNetworkCount(parseInt(savedCount, 10));
+        }
+      }
+    };
+    
+    loadCounter();
   }, []);
 
-  // Save counter to localStorage whenever it changes
+  // Save counter to localStorage as backup whenever it changes
   useEffect(() => {
     localStorage.setItem(COUNTER_STORAGE_KEY, networkCount.toString());
   }, [networkCount]);
-  const handleDataLoaded = (data: NetworkData) => {
+  const handleDataLoaded = async (data: NetworkData) => {
     setNetworkData(data);
+    
     // Increment counter when new network data is loaded
-    setNetworkCount(prev => prev + 1);
+    try {
+      const success = await incrementNetworkCounter();
+      if (success) {
+        // Reload the counter from Supabase to get the latest value
+        const newCount = await getNetworkCounter();
+        setNetworkCount(newCount);
+      } else {
+        // Fallback to local increment
+        setNetworkCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Failed to increment counter in Supabase:', error);
+      // Fallback to local increment
+      setNetworkCount(prev => prev + 1);
+    }
   };
   return <div className="min-h-screen bg-canvas">
       {/* Header */}

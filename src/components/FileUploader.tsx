@@ -104,11 +104,16 @@ export const FileUploader = ({
   const onFileUpload = useCallback((data: NetworkData) => {
     onDataLoaded(data);
   }, [onDataLoaded]);
+  
   const handleFileUpload = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = e => {
       try {
         const content = e.target?.result as string;
+        if (!content || content.trim() === '') {
+          throw new Error('File is empty or could not be read');
+        }
+        
         const data = JSON.parse(content);
 
         // Validate the data structure
@@ -135,9 +140,15 @@ export const FileUploader = ({
         onFileUpload(data);
         toast.success(`Successfully loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
       } catch (error) {
+        console.error('File upload error:', error);
         toast.error(`Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
+    
+    reader.onerror = () => {
+      toast.error('Error reading file. Please try again.');
+    };
+    
     reader.readAsText(file);
   }, [onFileUpload]);
 
@@ -165,12 +176,26 @@ export const FileUploader = ({
   // Parse JSON input
   const handleJsonSubmit = () => {
     try {
+      if (!jsonInput.trim()) {
+        throw new Error('Please enter JSON data');
+      }
+      
       const data = JSON.parse(jsonInput);
+      
+      // Validate the data structure
+      if (!data.nodes || !Array.isArray(data.nodes)) {
+        throw new Error('Invalid format: missing or invalid nodes array');
+      }
+      if (!data.edges || !Array.isArray(data.edges)) {
+        throw new Error('Invalid format: missing or invalid edges array');
+      }
+      
       onDataLoaded(data);
       setJsonInput('');
       toast.success('JSON data loaded successfully');
     } catch (error) {
-      toast.error('Invalid JSON format');
+      console.error('JSON parse error:', error);
+      toast.error(`Invalid JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
