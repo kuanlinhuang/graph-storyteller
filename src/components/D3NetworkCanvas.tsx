@@ -164,15 +164,27 @@ export const D3NetworkCanvas = ({
     // Clone the SVG to avoid modifying the original
     const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
     
-    // Add inline CSS to preserve styles
+    // Add inline CSS to preserve styles and fonts
     const style = document.createElement('style');
     style.textContent = `
-      .link { stroke-opacity: 0.7; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+      .link { stroke-opacity: 0.8; stroke-linecap: round; }
       .node { stroke-width: 2; cursor: pointer; }
-      .node-label { font-weight: 500; text-anchor: middle; dominant-baseline: central; }
-      #arrowhead { opacity: 0.7; }
+      .node-label { 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+        font-weight: 500; 
+        text-anchor: middle; 
+        dominant-baseline: central;
+        font-size: ${fontSize[0]}px;
+      }
+      #arrowhead { opacity: 0.8; }
     `;
     clonedSvg.insertBefore(style, clonedSvg.firstChild);
+    
+    // Ensure proper viewBox and dimensions
+    clonedSvg.setAttribute('width', '800');
+    clonedSvg.setAttribute('height', '500');
+    clonedSvg.setAttribute('viewBox', '0 0 800 500');
     
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(clonedSvg);
@@ -186,7 +198,7 @@ export const D3NetworkCanvas = ({
     link.click();
     URL.revokeObjectURL(url);
     toast.success('SVG exported successfully');
-  }, []);
+  }, [fontSize]);
   const exportPDF = useCallback(async () => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
@@ -197,6 +209,8 @@ export const D3NetworkCanvas = ({
       container.style.width = '800px';
       container.style.height = '500px';
       container.style.backgroundColor = '#ffffff';
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
       document.body.appendChild(container);
       
       // Clone and append SVG to container
@@ -206,7 +220,7 @@ export const D3NetworkCanvas = ({
       
       const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
-        scale: 4,
+        scale: 2, // Reduced scale for smaller file size
         useCORS: true,
         allowTaint: true,
         logging: false,
@@ -220,15 +234,67 @@ export const D3NetworkCanvas = ({
       document.body.removeChild(container);
       
       const pdf = new jsPDF('landscape');
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 297; // A4 landscape width
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // JPEG with compression
+      const imgWidth = 280;
       const imgHeight = canvas.height * imgWidth / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 8, 8, imgWidth, imgHeight);
       pdf.save('network-d3.pdf');
       toast.success('PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDF:', error);
       toast.error('Failed to export PDF. Try using SVG export instead.');
+    }
+  }, []);
+
+  const exportPNG = useCallback(async () => {
+    const svgElement = svgRef.current;
+    if (!svgElement) return;
+    
+    try {
+      // Create a container div for proper rendering
+      const container = document.createElement('div');
+      container.style.width = '800px';
+      container.style.height = '500px';
+      container.style.backgroundColor = '#ffffff';
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      document.body.appendChild(container);
+      
+      // Clone and append SVG to container
+      const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+      clonedSvg.style.backgroundColor = '#ffffff';
+      container.appendChild(clonedSvg);
+      
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 800,
+        height: 500,
+        windowWidth: 800,
+        windowHeight: 500
+      });
+      
+      // Clean up
+      document.body.removeChild(container);
+      
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'network-d3.png';
+          link.click();
+          URL.revokeObjectURL(url);
+          toast.success('PNG exported successfully');
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error exporting PNG:', error);
+      toast.error('Failed to export PNG');
     }
   }, []);
   return <div className="space-y-4">
@@ -303,11 +369,15 @@ export const D3NetworkCanvas = ({
         <div className="absolute top-6 right-6 flex gap-2">
           <Button onClick={exportSVG} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Export SVG
+            SVG
           </Button>
           <Button onClick={exportPDF} variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
-            Export PDF
+            PDF
+          </Button>
+          <Button onClick={exportPNG} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            PNG
           </Button>
         </div>
       </Card>

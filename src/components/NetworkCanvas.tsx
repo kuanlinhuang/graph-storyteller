@@ -249,6 +249,15 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     svg.setAttribute('viewBox', `0 0 800 600`);
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     
+    // Add embedded font
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+      .node-text { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 500; }
+      .edge-line { stroke-opacity: 0.8; }
+    `;
+    svg.appendChild(style);
+    
     // Add background
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('width', '800');
@@ -256,62 +265,85 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     rect.setAttribute('fill', '#ffffff');
     svg.appendChild(rect);
     
+    // Add definition for arrow markers
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', 'arrowhead');
+    marker.setAttribute('markerWidth', '10');
+    marker.setAttribute('markerHeight', '7');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '3.5');
+    marker.setAttribute('orient', 'auto');
+    
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+    polygon.setAttribute('fill', edgeColor[0]);
+    marker.appendChild(polygon);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+    
     // Add edges first (so they appear behind nodes)
     edges.forEach(edge => {
       const sourceNode = nodes.find(n => n.id === edge.source);
       const targetNode = nodes.find(n => n.id === edge.target);
       if (sourceNode && targetNode) {
+        // Calculate node dimensions from actual styles
+        const nodeWidth = parseInt(sourceNode.style?.width as string) || 120;
+        const nodeHeight = parseInt(sourceNode.style?.height as string) || 80;
+        const targetWidth = parseInt(targetNode.style?.width as string) || 120;
+        const targetHeight = parseInt(targetNode.style?.height as string) || 80;
+        
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', String(sourceNode.position.x + 60));
-        line.setAttribute('y1', String(sourceNode.position.y + 40));
-        line.setAttribute('x2', String(targetNode.position.x + 60));
-        line.setAttribute('y2', String(targetNode.position.y + 40));
+        line.setAttribute('x1', String(sourceNode.position.x + nodeWidth / 2));
+        line.setAttribute('y1', String(sourceNode.position.y + nodeHeight / 2));
+        line.setAttribute('x2', String(targetNode.position.x + targetWidth / 2));
+        line.setAttribute('y2', String(targetNode.position.y + targetHeight / 2));
         line.setAttribute('stroke', edgeColor[0]);
         line.setAttribute('stroke-width', String(edge.style?.strokeWidth || 2));
-        line.setAttribute('opacity', '0.7');
-        svg.appendChild(line);
+        line.setAttribute('class', 'edge-line');
         
-        // Add arrow marker for directed edges
         if (showDirected) {
-          const dx = targetNode.position.x - sourceNode.position.x;
-          const dy = targetNode.position.y - sourceNode.position.y;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          const unitX = dx / length;
-          const unitY = dy / length;
-          
-          // Arrow position (near target node)
-          const arrowX = targetNode.position.x + 60 - unitX * (60 + 10);
-          const arrowY = targetNode.position.y + 40 - unitY * (40 + 10);
-          
-          const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-          arrow.setAttribute('points', '0,-5 10,0 0,5');
-          arrow.setAttribute('fill', edgeColor[0]);
-          arrow.setAttribute('transform', `translate(${arrowX},${arrowY}) rotate(${Math.atan2(dy, dx) * 180 / Math.PI})`);
-          svg.appendChild(arrow);
+          line.setAttribute('marker-end', 'url(#arrowhead)');
         }
+        
+        svg.appendChild(line);
       }
     });
     
     // Add nodes on top
     nodes.forEach(node => {
+      const nodeWidth = parseInt(node.style?.width as string) || 120;
+      const nodeHeight = parseInt(node.style?.height as string) || 80;
+      
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       rect.setAttribute('x', String(node.position.x));
       rect.setAttribute('y', String(node.position.y));
-      rect.setAttribute('width', '120');
-      rect.setAttribute('height', '80');
+      rect.setAttribute('width', String(nodeWidth));
+      rect.setAttribute('height', String(nodeHeight));
       rect.setAttribute('fill', 'hsl(220, 70%, 50%)');
       rect.setAttribute('stroke', '#ffffff');
       rect.setAttribute('stroke-width', '2');
       rect.setAttribute('rx', '8');
       svg.appendChild(rect);
       
-      // Add label
+      // Add type badge
+      const typeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      typeText.setAttribute('x', String(node.position.x + 8));
+      typeText.setAttribute('y', String(node.position.y + 16));
+      typeText.setAttribute('font-size', '10');
+      typeText.setAttribute('fill', 'rgba(255, 255, 255, 0.8)');
+      typeText.setAttribute('class', 'node-text');
+      typeText.textContent = node.data.type || 'default';
+      svg.appendChild(typeText);
+      
+      // Add main label
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', String(node.position.x + 60));
-      text.setAttribute('y', String(node.position.y + 45));
+      text.setAttribute('x', String(node.position.x + nodeWidth / 2));
+      text.setAttribute('y', String(node.position.y + nodeHeight / 2 + 4));
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('font-size', '12');
+      text.setAttribute('font-size', '14');
       text.setAttribute('fill', '#ffffff');
+      text.setAttribute('class', 'node-text');
       text.textContent = node.data.label;
       svg.appendChild(text);
     });
@@ -340,8 +372,8 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
       
       // Create a temporary container for better rendering
       const container = document.createElement('div');
-      container.style.width = reactFlowElement.offsetWidth + 'px';
-      container.style.height = reactFlowElement.offsetHeight + 'px';
+      container.style.width = '800px';
+      container.style.height = '600px';
       container.style.backgroundColor = '#ffffff';
       container.style.position = 'absolute';
       container.style.top = '-9999px';
@@ -353,29 +385,83 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
       
       const canvas = await html2canvas(container, {
         backgroundColor: '#ffffff',
-        scale: 4,
+        scale: 2, // Reduced scale for smaller file size
         useCORS: true,
         allowTaint: true,
         logging: false,
         width: 800,
-        height: 500,
+        height: 600,
         windowWidth: 800,
-        windowHeight: 500
+        windowHeight: 600
       });
       
       // Clean up
       document.body.removeChild(container);
       
       const pdf = new jsPDF('landscape');
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 297; // A4 landscape width
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // JPEG with compression for smaller size
+      const imgWidth = 280;
       const imgHeight = canvas.height * imgWidth / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 8, 8, imgWidth, imgHeight);
       pdf.save('network-reactflow.pdf');
       toast.success('PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDF:', error);
       toast.error('Failed to export PDF. Try using SVG export instead.');
+    }
+  }, []);
+
+  const exportPNG = useCallback(async () => {
+    try {
+      const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
+      if (!reactFlowElement) {
+        toast.error('Could not find React Flow element');
+        return;
+      }
+      
+      // Create a temporary container for better rendering
+      const container = document.createElement('div');
+      container.style.width = '800px';
+      container.style.height = '600px';
+      container.style.backgroundColor = '#ffffff';
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      document.body.appendChild(container);
+      
+      // Clone the React Flow element
+      const clonedElement = reactFlowElement.cloneNode(true) as HTMLElement;
+      container.appendChild(clonedElement);
+      
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 800,
+        height: 600,
+        windowWidth: 800,
+        windowHeight: 600
+      });
+      
+      // Clean up
+      document.body.removeChild(container);
+      
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'network-reactflow.png';
+          link.click();
+          URL.revokeObjectURL(url);
+          toast.success('PNG exported successfully');
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error exporting PNG:', error);
+      toast.error('Failed to export PNG');
     }
   }, []);
 
@@ -492,11 +578,15 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
         <div className="absolute top-6 right-6 flex gap-2">
           <Button onClick={exportSVG} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Export SVG
+            SVG
           </Button>
           <Button onClick={exportPDF} variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
-            Export PDF
+            PDF
+          </Button>
+          <Button onClick={exportPNG} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            PNG
           </Button>
         </div>
       </Card>
