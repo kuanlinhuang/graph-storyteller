@@ -104,7 +104,6 @@ export const FileUploader = ({
   const onFileUpload = useCallback((data: NetworkData) => {
     onDataLoaded(data);
   }, [onDataLoaded]);
-  
   const handleFileUpload = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = e => {
@@ -113,7 +112,6 @@ export const FileUploader = ({
         if (!content || content.trim() === '') {
           throw new Error('File is empty or could not be read');
         }
-        
         const data = JSON.parse(content);
 
         // Validate the data structure
@@ -144,11 +142,9 @@ export const FileUploader = ({
         toast.error(`Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
-    
     reader.onerror = () => {
       toast.error('Error reading file. Please try again.');
     };
-    
     reader.readAsText(file);
   }, [onFileUpload]);
 
@@ -179,9 +175,8 @@ export const FileUploader = ({
       if (!jsonInput.trim()) {
         throw new Error('Please enter JSON data');
       }
-      
       const data = JSON.parse(jsonInput);
-      
+
       // Validate the data structure
       if (!data.nodes || !Array.isArray(data.nodes)) {
         throw new Error('Invalid format: missing or invalid nodes array');
@@ -189,7 +184,6 @@ export const FileUploader = ({
       if (!data.edges || !Array.isArray(data.edges)) {
         throw new Error('Invalid format: missing or invalid edges array');
       }
-      
       onDataLoaded(data);
       setJsonInput('');
       toast.success('JSON data loaded successfully');
@@ -277,27 +271,8 @@ export const FileUploader = ({
 
       {/* JSON Input Card */}
       <Card className="shadow-card-custom">
-        <CardHeader>
-          <CardTitle>Direct JSON Input</CardTitle>
-          <CardDescription>Load Sample</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="json-input">JSON Data</Label>
-            <Textarea id="json-input" placeholder={`{
-  "nodes": [
-    {"id": "1", "label": "Node 1", "type": "server"},
-    {"id": "2", "label": "Node 2", "type": "client"}
-  ],
-  "edges": [
-    {"id": "e1", "source": "1", "target": "2", "label": "connection"}
-  ]
-}`} value={jsonInput} onChange={e => setJsonInput(e.target.value)} rows={8} className="font-mono text-sm" />
-          </div>
-          <Button onClick={handleJsonSubmit} disabled={!jsonInput.trim()} className="w-full">
-            Load JSON Data
-          </Button>
-        </CardContent>
+        
+        
       </Card>
 
       {/* Current Data Info */}
@@ -324,7 +299,7 @@ export const FileUploader = ({
       {/* Format Documentation */}
       <Card className="shadow-card-custom">
         <CardHeader>
-          <CardTitle>Supported Format</CardTitle>
+          <CardTitle>Supported json Format</CardTitle>
           <CardDescription>
             Your JSON file should follow this structure
           </CardDescription>
