@@ -168,7 +168,13 @@ export const D3NetworkCanvas = ({
     const style = document.createElement('style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-      .link { stroke-opacity: 0.8; stroke-linecap: round; }
+      .link { 
+        stroke: ${edgeColor[0]}; 
+        stroke-opacity: 0.8; 
+        stroke-linecap: round; 
+        stroke-width: 2px;
+        fill: none;
+      }
       .node { stroke-width: 2; cursor: pointer; }
       .node-label { 
         font-family: 'Inter', system-ui, -apple-system, sans-serif; 
@@ -176,8 +182,17 @@ export const D3NetworkCanvas = ({
         text-anchor: middle; 
         dominant-baseline: central;
         font-size: ${fontSize[0]}px;
+        fill: ${textColor[0]};
       }
-      #arrowhead { opacity: 0.8; }
+      #arrowhead { 
+        opacity: 0.8; 
+        fill: ${edgeColor[0]};
+      }
+      line {
+        stroke: ${edgeColor[0]};
+        stroke-opacity: 0.8;
+        stroke-width: 2px;
+      }
     `;
     clonedSvg.insertBefore(style, clonedSvg.firstChild);
     

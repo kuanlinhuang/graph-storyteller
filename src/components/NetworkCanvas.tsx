@@ -57,6 +57,7 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
   const [selectedEdges, setSelectedEdges] = useState<Edge[]>([]);
   const [showDirected, setShowDirected] = useState(true);
   const [edgeColor, setEdgeColor] = useState(['#3b82f6']);
+  const [textColor, setTextColor] = useState(['#000000']);
 
   const nodeTypes = useMemo(() => ({
     network: NetworkNode,
@@ -253,8 +254,17 @@ export const NetworkCanvas = ({ data, onDataChange }: NetworkCanvasProps) => {
     const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
     style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-      .node-text { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 500; }
-      .edge-line { stroke-opacity: 0.8; }
+      .node-text { 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+        font-weight: 500; 
+        fill: ${textColor[0]};
+      }
+      .edge-line { 
+        stroke: ${edgeColor[0]}; 
+        stroke-opacity: 0.8; 
+        stroke-width: 2px;
+        fill: none;
+      }
     `;
     svg.appendChild(style);
     
