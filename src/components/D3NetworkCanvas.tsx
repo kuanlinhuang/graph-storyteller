@@ -56,14 +56,30 @@ export const D3NetworkCanvas = ({
       metadata: node.metadata,
       radius: nodeSize[0]
     }));
-    const d3Links: D3Link[] = data.edges.map(edge => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      label: edge.label,
-      weight: edge.weight || 1,
-      type: edge.type
-    }));
+    
+    // Create a set of valid node IDs for validation
+    const nodeIds = new Set(d3Nodes.map(node => node.id));
+    
+    // Filter out links that reference non-existent nodes
+    const d3Links: D3Link[] = data.edges
+      .filter(edge => {
+        const sourceExists = nodeIds.has(edge.source);
+        const targetExists = nodeIds.has(edge.target);
+        if (!sourceExists || !targetExists) {
+          console.warn(`Filtered out edge ${edge.id}: source=${edge.source} (exists: ${sourceExists}), target=${edge.target} (exists: ${targetExists})`);
+          return false;
+        }
+        return true;
+      })
+      .map(edge => ({
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        label: edge.label,
+        weight: edge.weight || 1,
+        type: edge.type
+      }));
+    
     setNodes(d3Nodes);
     setLinks(d3Links);
   }, [data, nodeSize]);
